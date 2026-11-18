@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="sv">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Morgonkryss</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background: #f6f3ea;
+      color: #152e35;
+      font: 16px system-ui;
+      margin: 24px auto;
+      padding: 0 16px;
+      max-width: 870px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px double;
+      padding: 10px 0;
+      gap: 10px;
+    }
+    h1 {
+      font: bold clamp(28px, 6vw, 54px) Georgia;
+      margin: 0;
+    }
+    img {
+      width: 100%;
+      height: clamp(130px, 24vh, 240px);
+      object-fit: cover;
+      display: block;
+      margin: 15px 0;
+    }
+    #scroll {
+      overflow: auto;
+    }
+    #grid {
+      display: grid;
+      width: max-content;
+      margin: auto;
+      background: #e6e5d8;
+      gap: 1px;
+      border: 1px solid #919b91;
+    }
+    .cell,
+    .clue {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      border: 0;
+      text-align: center;
+      padding: 1px;
+    }
+    .cell {
+      background: white;
+      color: #20363b;
+      font: bold 23px Georgia;
+      text-transform: uppercase;
+      border-radius: 0;
+    }
+    .cell.active {
+      background: #fff3bd;
+    }
+    .cell.bad {
+      box-shadow: inset 0 0 0 2px #a73835;
+    }
+    .cell:focus {
+      outline: 2px solid #317875;
+      outline-offset: -2px;
+    }
+    .box {
+      background: #dce7dc;
+      display: flex;
+      flex-direction: column;
+    }
+    .clue {
+      flex: 1;
+      font: 600 10px/1.05 system-ui;
+      overflow-wrap: anywhere;
+      background: transparent;
+      cursor: pointer;
+    }
+    button,
+    select,
+    textarea {
+      font: inherit;
+    }
+    textarea {
+      display: block;
+      width: 100%;
+      margin: 6px 0;
+      padding: 8px;
+    }
+    button.action,
+    select {
+      padding: 7px 12px;
+    }
+    section {
+      margin: 16px 0;
+    }
+    #hint {
+      min-height: 1.4em;
+      font-family: Georgia;
+    }
+
+    .page.side-by-side {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(0, 2fr);
+      gap: 14px;
+    }
+    .side-by-side img {
+      height: 100%;
+      max-height: 68vh;
+    }
+    #scroll {
+      padding: 4px;
+    }
+    .page img {
+      border-radius: 3px;
+    }
+    @media (max-width: 740px) {
+      .page.side-by-side {
+        display: block;
+      }
+      .side-by-side img {
+        height: 160px;
+      }
+    }
+  </style>
+  <main id="app"></main>
+  <script type="module" src="/layout.js"></script>
+</html>
