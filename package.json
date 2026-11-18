@@ -5,7 +5,8 @@
     "build:view": "bun build view.tsx --target browser --minify --outfile dist/layout.js",
     "desktop": "bun run build:view && electrobun dev",
     "check": "bun run build:view && python3 -m unittest && bun test",
-    "build": "bun run build:view && electrobun build"
+    "build": "bun run build:view && electrobun build",
+    "render:check": "bun run build:view && python3 tools/check-render.py"
   },
   "dependencies": {
     "@ui-sdk/core": "^0.1.0-beta.10",
@@ -14,5 +15,8 @@
     "electrobun": "^2.0.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "playwright-core": "1.65.0"
   }
 }

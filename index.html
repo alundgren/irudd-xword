@@ -50,13 +50,13 @@
     .cell,
     .clue {
       width: 100%;
-      height: 100%;
       min-width: 0;
       border: 0;
       text-align: center;
       padding: 1px;
     }
     .cell {
+      height: 100%;
       background: white;
       color: #20363b;
       font: bold 23px Georgia;
@@ -79,11 +79,15 @@
       flex-direction: column;
     }
     .clue {
-      flex: 1;
-      font: 600 10px/1.05 system-ui;
+      flex: 1 0 auto;
+      padding: 3px 2px;
+      font: 600 11px/1.15 system-ui;
       overflow-wrap: anywhere;
       background: transparent;
       cursor: pointer;
+    }
+    .clue + .clue {
+      border-top: 1px solid #a5b6a8;
     }
     button,
     select,

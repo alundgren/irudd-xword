@@ -55,7 +55,7 @@ function Crossword() {
     "repeat(" +
     (1 + Math.max(...positions.map((p) => p[axis]))) +
     "," +
-    size +
+    (axis === 0 ? size : `minmax(${size}, max-content)`) +
     ")";
   const at = ([x, y]: Cell) => ({ gridColumn: x + 1, gridRow: y + 1 });
   const active = entries[selected].cells.map(String);
