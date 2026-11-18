@@ -7,7 +7,7 @@ sv	REP	Grovt snöre
 sv	BÅT	Kan ligga för ankar
 sv	RO	Bruka åror
 sv	SEGEL	Fångar vinden
-sv	ÅRA	Sitter i tullen
+sv	ÅRA	Sitter i årtullen
 sv	VIND	Får löv att darra
 sv	KAJ	Där fartyg lägger till
 sv	TALL	Träd med barr
@@ -17,7 +17,7 @@ sv	EKA	Båt med åror
 sv	NÄT	Fångar fisk
 sv	RATT	För styrning
 sv	SAND	På stranden
-sv	ÖRA	Hörselorgan
+sv	ÖRA	Fångar upp ljud
 sv	ÅSKA	Dunder i skyn
 sv	DAG	Mellan nätter
 sv	SOL	Går upp i öster
@@ -99,3 +99,338 @@ sv	UR	Visar tiden
 sv	BY	Liten ort
 sv	BO	Fågelhem
 sv	ED	Avläggs i rätten
+sv	AL	Träd med små kottar
+sv	AV	Motsats till på
+sv	AX	Sädens topp
+sv	BI	Surrar i kupan
+sv	EL	Driver en visp
+sv	EM	Mästerskap i Europa
+sv	EN	Barrig buske
+sv	ER	Tillhör dem man tilltalar
+sv	EX	Före detta partner
+sv	EK	Bär ollon
+sv	EJ	Inte
+sv	FE	Trollar i sagan
+sv	FEG	Saknar mod
+sv	GE	Räcka över
+sv	GÅ	Ta sig fram till fots
+sv	HA	Äga
+sv	HEJ	Ord vid möte
+sv	HO	Plats för disk
+sv	HÖ	Torkat gräs
+sv	ID	Fisk i ån
+sv	IL	Plötslig vindstöt
+sv	IN	Motsats till ut
+sv	JA	Visst!
+sv	JO	Svar på nekande fråga
+sv	KO	Mjölkdjur
+sv	LE	Dra på munnen
+sv	LO	Katt med örontofsar
+sv	LY	Skydd för regnet
+sv	MO	Sandig skogsmark
+sv	MÅ	Känna sig
+sv	NI	Tilltal till flera
+sv	NU	I denna stund
+sv	NY	Färsk
+sv	NÅ	Komma fram till
+sv	OS	Olympiska spel
+sv	PÅ	Motsats till av
+sv	RA	Egyptisk solgud
+sv	RÅ	Ej tillagad
+sv	SE	Uppfatta med ögonen
+sv	SY	Arbeta med nål
+sv	SÅ	Sätta frön
+sv	TA	Gripa
+sv	TÅ	Fotens yttersta del
+sv	UT	Motsats till in
+sv	VE	Klagorop
+sv	VI	Du och jag
+sv	YR	Vimmelkantig
+sv	ÅL	Långsmal fisk
+sv	ÅR	Tolv månader
+sv	ÅT	I riktning mot
+sv	ÄR	Presens av vara
+sv	ÄT	Uppmaning vid matbordet
+sv	ÖL	Dryck av malt
+sv	ÖM	Känslig för tryck
+sv	ÖN	Landet med vatten runt
+sv	ÖR	Liten grusbank
+sv	APA	Klättrande primat
+sv	ARG	På dåligt humör
+sv	ART	Sort i naturen
+sv	ASP	Träd med darrande löv
+sv	BAD	Dopp
+sv	BAK	Motsats till fram
+sv	BAL	Högtidlig dans
+sv	BAR	Utan kläder
+sv	BAS	Djup sångröst
+sv	BEN	Stöd i kroppen
+sv	BER	Vädjar
+sv	BET	Satte tänderna i
+sv	BIL	Fordon på fyra hjul
+sv	BIO	Salong för film
+sv	BIT	Liten del
+sv	BOK	Läses från pärm till pärm
+sv	BOM	Stänger vägen
+sv	BOR	Har sin bostad
+sv	BOT	Läkedom
+sv	BRA	Utmärkt
+sv	BRO	Leder över vatten
+sv	BUD	Levererar paket
+sv	BUR	Hem för kanariefågel
+sv	BUS	Upptåg
+sv	BÄR	Blått i skogen ibland
+sv	BÖN	Önskan till högre makt
+sv	DAL	Mellan berg
+sv	DAM	Kvinna eller spelpjäs
+sv	DEN	Pekar ut en sak
+sv	DET	Pronomen för huset
+sv	DIG	Den som jag talar till
+sv	DIN	Som tillhör dig
+sv	DOM	Rättens avgörande
+sv	DRA	Motsats till skjuta
+sv	DUK	Täcker bordet
+sv	DUM	Oklok
+sv	DYR	Kostar mycket
+sv	DÅN	Kraftigt buller
+sv	DÄR	På den platsen
+sv	EKO	Svar från bergväggen
+sv	ELD	Lågor
+sv	ENS	Inte det minsta, med »inte«
+sv	ERA	Tidsålder
+sv	ETT	Minsta positiva heltalet
+sv	FAN	Idolens beundrare
+sv	FAR	Pappa
+sv	FEL	Misstag
+sv	FEM	Antal fingrar på handen
+sv	FET	Rik på grädde
+sv	FIL	Syrad frukostmat
+sv	FIN	Vacker
+sv	FOT	Längst ner på benet
+sv	FRI	Obunden
+sv	FRÖ	Kan gro
+sv	FUL	Ovacker
+sv	FÅR	Ger ull
+sv	FÅS	Kan erhållas
+sv	GAP	Vidöppen mun
+sv	GAS	Är luft ett exempel på
+sv	GAV	Räckte över
+sv	GEL	Dallrande massa
+sv	GER	Skänker
+sv	GET	Djur med skägg
+sv	GLO	Stirra
+sv	GOD	Välsmakande
+sv	GOS	Kelig samvaro
+sv	GUL	Citronfärgad
+sv	GÅR	Tar sig fram till fots
+sv	GÅS	Fågel vid julbordet
+sv	HAL	Lätt att halka på
+sv	HAN	Pronomen för pojken
+sv	HAR	Äger
+sv	HAT	Stark avsky
+sv	HEL	Utan sprickor
+sv	HEM	Bostad
+sv	HET	Brännvarm
+sv	HIT	Till denna plats
+sv	HON	Pronomen för flickan
+sv	HOP	Samling
+sv	HOT	Bådande fara
+sv	HOV	Hästens fot
+sv	HUR	På vilket sätt?
+sv	HUS	Bostadsbyggnad
+sv	HÅL	Öppning
+sv	HÅR	Kammas
+sv	HÄL	Längst bak på foten
+sv	HÄR	På denna plats
+sv	HÖG	Stapel
+sv	HÖR	Uppfattar ljud
+sv	IDE	Björnens vinterhem
+sv	ILA	Skynda
+sv	ISA	Bilda frost
+sv	JAG	Den som talar
+sv	KAL	Utan hår
+sv	KAM	Redskap med tänder
+sv	KAN	Har förmåga
+sv	KAR	Stort kärl
+sv	KIL	Slås in för att sära
+sv	KIT	Liten uppsättning
+sv	KLO	Rovfågelns nagel
+sv	KOL	Bränsle från gruvan
+sv	KOR	Mjölkdjur i flock
+sv	KUL	Roligt
+sv	KUR	Liten vaktstuga
+sv	KÅL	Vanlig i kåldolmar
+sv	KÄR	Förälskad
+sv	KÖK	Plats för matlagning
+sv	LAG	Spelar tillsammans
+sv	LAM	Förlamad
+sv	LAS	Lagen om anställningsskydd
+sv	LAT	Ovillig att arbeta
+sv	LAV	Växer på träd och sten
+sv	LED	Väg för vandrare
+sv	LEK	Barns syssla
+sv	LEN	Mjuk mot huden
+sv	LER	Drar på munnen
+sv	LEV	Uppmaning till liv
+sv	LIK	Död kropp
+sv	LIM	Fäster papper
+sv	LIN	Ger tygfiber
+sv	LIV	Full fart och rörelse
+sv	LOK	Drar tåget
+sv	LOV	Ledigt från skolan
+sv	LUR	Telefondel vid örat
+sv	LUS	Liten parasit
+sv	LÅG	Ej hög
+sv	LÅN	Ska betalas tillbaka
+sv	LÅS	Öppnas med nyckel
+sv	LÅT	Spelas på radion
+sv	LÄS	Uppmaning med bok i hand
+sv	LÖK	Får kocken att gråta
+sv	MAL	Fjäril i garderoben
+sv	MAN	Hår på hästens hals
+sv	MED	I sällskap av
+sv	MEN	Invändning i ett ord
+sv	MER	Ytterligare
+sv	MES	Liten fågel eller fegis
+sv	MIG	Den som talar, i objektsform
+sv	MIL	Tio kilometer
+sv	MIN	Som tillhör mig
+sv	MOD	Behövs för att våga
+sv	MOL	Enhet för substansmängd
+sv	MOR	Mamma
+sv	MOS	Stampad potatis
+sv	MOT	I riktning till
+sv	MUN	Används för tal
+sv	MUR	Vägg av sten
+sv	MUS	Liten gnagare
+sv	MÅL	Dit resan går
+sv	MÅR	Känner sig
+sv	MÄT	Använd måttbandet!
+sv	NAV	Hjulets mitt
+sv	NEJ	Avslag
+sv	NOG	Tillräckligt
+sv	NOS	Hundens luktorgan
+sv	NYP	Litet grepp med fingrarna
+sv	NÅL	Redskap med öga
+sv	NÅR	Kommer fram till
+sv	NÄR	Vid vilken tid?
+sv	NÖD	Akut fara
+sv	NÖT	Hasselns frukt
+sv	OBS	Se upp!
+sv	OCH	Binder ihop två ord
+sv	ONT	Kan ett sår göra
+sv	ORD	Bygger meningar
+sv	ORM	Krälar
+sv	ORT	Plats på kartan
+sv	OST	Lagras och hyvlas
+sv	OÅR	År med missväxt
+sv	PAR	Två som hör ihop
+sv	PIL	Skjuts från båge
+sv	PIR	Sträcker sig ut i vattnet
+sv	PUB	Ställe för en öl
+sv	RAD	Stolar i bredd
+sv	RAK	Utan krök
+sv	RAM	Runt tavlan
+sv	RAR	Snäll och gullig
+sv	RAS	Mark som ger vika
+sv	RED	Satt till häst
+sv	REM	Bälte av läder
+sv	REN	Har horn och drar släde
+sv	RES	Ge dig iväg!
+sv	REV	Grund under ytan
+sv	RIK	Förmögen
+sv	RIM	Lika ljud på slutet
+sv	RIV	Gör till små strimlor!
+sv	ROM	Fiskägg
+sv	ROP	Högt tilltal
+sv	ROR	Använder årorna
+sv	ROT	Under stam och jord
+sv	RUM	Del av bostad
+sv	RÅD	Tips eller förslag
+sv	RÅG	Säd till mörkt bröd
+sv	RÅR	Bestämmer, med »över«
+sv	RÄT	Mäter 90 grader, om vinkel
+sv	RÖD	Vallmofärgad
+sv	RÖK	Stiger från brasan
+sv	RÖN	Forskningsresultat
+sv	RÖR	Leder vatten
+sv	SAL	Stort rum
+sv	SAK	Föremål
+sv	SEN	Kommer efter utsatt tid
+sv	SER	Uppfattar med ögonen
+sv	SES	Träffas
+sv	SET	Del av tennismatch
+sv	SIG	Reflexivt pronomen
+sv	SIL	Fångar pastan vid avhällning
+sv	SIN	Som tillhör subjektet
+sv	SKO	På foten
+sv	SKY	Moln eller steksaft
+sv	SLÖ	Behöver slipas
+sv	SMÅ	Ej stora
+sv	SNO	Ta i smyg
+sv	SOM	Inleder en liknelse
+sv	SOT	Svart i skorstenen
+sv	SOV	Låg i sängen
+sv	SPA	Ställe för avkoppling och bad
+sv	SPÅ	Se in i framtiden
+sv	STO	Häst som kan föla
+sv	SUR	Motsats till söt
+sv	SUS	Ljud i löven
+sv	SÅG	Kapar brädan
+sv	SÅR	Skråma
+sv	SÄG	Be någon tala
+sv	SÖK	Leta!
+sv	TAK	Skyddar huset ovanifrån
+sv	TAL	Hålls vid en skål
+sv	TAM	Van vid människor
+sv	TAR	Griper
+sv	TAS	Blir taget
+sv	TEG	Liten åkerbit
+sv	TEN	Smal metallstång
+sv	TID	Visar klockan
+sv	TIG	Var tyst!
+sv	TIO	Dubbelt upp mot fem
+sv	TOM	Utan innehåll
+sv	TON	Tusen kilo
+sv	TOR	Åskgud
+sv	TRO	Ha tillit
+sv	TUB	Rör för tandkräm
+sv	TUR	Lycka eller utflykt
+sv	TVÅ	Ett par
+sv	TÅR	Droppe från ögat
+sv	TÄT	Utan luckor
+sv	TÖM	Hålls av kusken
+sv	UDD	Vass spets
+sv	UGN	Gräddar bröd
+sv	UNG	Har få år på nacken
+sv	USA	Land med femtio stater
+sv	UTE	I friska luften
+sv	VAL	Stort däggdjur
+sv	VAN	Erfaren
+sv	VAR	På vilken plats?
+sv	VAS	Står blommor i
+sv	VED	Bränsle till brasan
+sv	VEM	Fråga om person
+sv	VET	Har kunskap om
+sv	VIG	Smidig
+sv	VIN	Dryck av druvor
+sv	VIS	Mycket klok
+sv	VIT	Snöfärgad
+sv	VÅG	Väger varor
+sv	VÅR	Mellan vinter och sommar
+sv	VÄG	Leder trafik
+sv	VÄL	Allt är gott och…
+sv	VÄN	Nära kamrat
+sv	ÅKA	Fara iväg
+sv	ÄGD	I någons besittning
+sv	ÄGG	Hönan värper det
+sv	ÄLG	Skogens konung
+sv	ÄLV	Stor å i norr
+sv	ÄRA	Heder
+sv	ÄTA	Inta föda
+sv	ÄTS	Blir uppätet
+sv	ÄTT	Släkt
+sv	ÖGA	Ser med det
+sv	ÖKA	Bli större
+sv	ÖRN	Stor rovfågel
+sv	ÖSA	Tömma med skopa

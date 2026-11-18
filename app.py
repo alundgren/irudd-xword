@@ -9,6 +9,7 @@ from datetime import date
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlsplit
 
+from dense import generate_dense
 from engine import ROOT, bank, check_layout, generate, inspect, locate_pictures, path
 
 DATA = Path(os.environ.get('XWORD_DATA', Path.home() / '.local/share/irudd-xword'))
@@ -82,7 +83,9 @@ def edition(lang, pack=None):
             if not re.fullmatch('[A-ZÅÄÖ]{2,30}', w) or not isinstance(c, str) or not c.strip():
                 raise ValueError('Expected uppercase entries of 2–30 letters and nonempty clues')
     entries = spec.get('entries')
-    if entries is None:
+    if entries is None and spec.get("fill") == "dense":
+        entries = generate_dense(words, tuple(pictures), history(lang))
+    elif entries is None:
         entries = generate(lang, history(lang), words=words, picture_answers=tuple(pictures))
     check_layout(entries, words)
     if not any(e[0] == next(iter(words)) for e in entries):

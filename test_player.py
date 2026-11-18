@@ -1,3 +1,4 @@
+from collections import Counter
 import json
 import os
 import subprocess
@@ -39,6 +40,10 @@ class PlayerTest(unittest.TestCase):
                 lengths = [len(e['cells']) for e in p['entries']]
                 self.assertLessEqual(min(lengths), 3)
                 self.assertGreaterEqual(max(lengths), 8)
+                visits = Counter(tuple(cell) for entry in p['entries'] for cell in entry['cells'])
+                self.assertGreaterEqual(sum(n == 2 for n in visits.values()) / len(visits), 0.60)
+                for entry in p['entries']:
+                    self.assertGreaterEqual(sum(visits[tuple(c)] == 2 for c in entry['cells']), 2)
                 occupied = set()
                 for entry in p['entries']:
                     occupied.update(map(tuple, entry['cells']))

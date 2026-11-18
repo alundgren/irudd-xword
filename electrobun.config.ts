@@ -7,6 +7,7 @@ export default {
       [
         "app.py",
         "engine.py",
+        "dense.py",
         "words.tsv",
         "index.html",
         "illustration.png",
