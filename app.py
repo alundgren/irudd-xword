@@ -10,7 +10,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlsplit
 
 from dense import generate_dense
-from engine import ROOT, bank, check_layout, generate, inspect, locate_pictures, path
+from engine import ROOT, bank, check_layout, generate, inspect, locate_pictures, path, picture_cells
 
 DATA = Path(os.environ.get('XWORD_DATA', Path.home() / '.local/share/irudd-xword'))
 DATA.mkdir(parents=True, exist_ok=True)
@@ -23,6 +23,9 @@ if 'picture' not in [r[1] for r in db.execute('PRAGMA table_info(editions)')]:
 LAYOUTS = ('picture-first', 'grid-first', 'side-by-side')
 if 'layout' not in [r[1] for r in db.execute('PRAGMA table_info(editions)')]:
     db.execute("ALTER TABLE editions ADD COLUMN layout TEXT DEFAULT 'picture-first'")
+if 'title' not in [r[1] for r in db.execute('PRAGMA table_info(editions)')]:
+    db.execute("ALTER TABLE editions ADD COLUMN title TEXT DEFAULT ''")
+db.execute("CREATE UNIQUE INDEX IF NOT EXISTS named_editions ON editions(lang,day,title) WHERE title <> ''")
 db.execute("CREATE TABLE IF NOT EXISTS marks (edition INTEGER, cell TEXT, guess TEXT, PRIMARY KEY(edition,cell))")
 
 
@@ -90,10 +93,19 @@ def edition(lang, pack=None):
     check_layout(entries, words)
     if not any(e[0] == next(iter(words)) for e in entries):
         raise ValueError('The grid must include the picture answer')
-    rectangles = locate_pictures(entries, pictures) if pictures else []
+    if 'picture_rect' in spec:
+        rect = spec['picture_rect']
+        if len(pictures) != 1:
+            raise ValueError('An explicit rectangle requires exactly one picture')
+        picture_cells(entries, rect)
+        rectangles = [rect]
+    else:
+        rectangles = locate_pictures(entries, pictures) if pictures else []
+    day = date.fromisoformat(spec.get('edition_day', date.today().isoformat())).isoformat()
+    title = spec.get('title', '').strip()
     with db:
-        row = db.execute('INSERT INTO editions(lang,day,entries,clues,picture,layout) VALUES(?,?,?,?,?,?)',
-                         (lang, date.today().isoformat(), json.dumps(entries), json.dumps([words[e[0]] for e in entries]), picture, layout))
+        row = db.execute('INSERT INTO editions(lang,day,entries,clues,picture,layout,title) VALUES(?,?,?,?,?,?,?)',
+                         (lang, day, json.dumps(entries), json.dumps([words[e[0]] for e in entries]), picture, layout, title))
         db.executemany("INSERT INTO panels VALUES(?,?,?,?)",
                        [(row.lastrowid, n, filename, json.dumps(rect)) for n, (filename, rect) in enumerate(zip(pictures.values(), rectangles), 1)])
     return row.lastrowid
@@ -126,7 +138,7 @@ class Handler(BaseHTTPRequestHandler):
             if row:
                 return self.reply(picture_path(row[0]).read_bytes(), 'image/png')
         if route == '/editions':
-            rows = db.execute('SELECT id,lang,day FROM editions ORDER BY id DESC').fetchall()
+            rows = db.execute('SELECT id,lang,day,title FROM editions ORDER BY day DESC,id DESC').fetchall()
             return self.reply(rows)
         match = re.fullmatch(r'/p/(\d+)', route)
         if match:

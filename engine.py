@@ -151,3 +151,17 @@ def locate_pictures(entries, answers):
         occupied.update((i,j) for i in range(x,x+w) for j in range(y,y+h))
         results.append([x,y,w,h])
     return results
+
+def picture_cells(entries, rect):
+    """Validate an authored picture against exactly the cells the player draws."""
+    if not isinstance(rect, list) or len(rect)!=4 or any(type(n) is not int for n in rect):
+        raise ValueError('Supply an integer picture rectangle [x,y,width,height]')
+    x,y,w,h=rect
+    letters,clues=inspect(entries)
+    board=letters.keys() | clues
+    if min(x,y)<0 or min(w,h)<1 or x+w>max(i for i,j in board)+1 or y+h>max(j for i,j in board)+1:
+        raise ValueError('Picture rectangle lies outside the grid')
+    photo={(i,j) for i in range(x,x+w) for j in range(y,y+h)}
+    if photo.intersection(board):
+        raise ValueError('Picture covers a clue or answer cell')
+    return photo

@@ -24,6 +24,18 @@
       padding: 10px 0;
       gap: 10px;
     }
+    header select {
+      min-width: 0;
+      max-width: 100%;
+    }
+    @media (max-width: 600px) {
+      header {
+        flex-wrap: wrap;
+      }
+      header select {
+        width: 100%;
+      }
+    }
     h1 {
       font: bold clamp(28px, 6vw, 54px) Georgia;
       margin: 0;
@@ -82,6 +94,7 @@
       flex: 1 0 auto;
       padding: 3px 2px;
       font: 600 11px/1.15 system-ui;
+      hyphens: auto;
       overflow-wrap: anywhere;
       background: transparent;
       cursor: pointer;

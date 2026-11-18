@@ -18,7 +18,7 @@ type Edition = {
   guesses: Record<string, string>;
   feedback: string;
 };
-type Row = [number, string, string];
+type Row = [number, string, string, string?];
 async function request(route: string, data?: object) {
   const response = await fetch(
     route,
@@ -264,7 +264,14 @@ function App() {
     request("/editions")
       .then((list) => {
         setRows(list);
-        setId(list[0]?.[0] || 0);
+        const requested = Number(
+          new URLSearchParams(location.search).get("edition"),
+        );
+        setId(
+          list.some((row: Row) => row[0] === requested)
+            ? requested
+            : list[0]?.[0] || 0,
+        );
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -277,9 +284,9 @@ function App() {
           value={id}
           onChange={(e) => setId(Number(e.target.value))}
         >
-          {rows.map(([n, lang, date]) => (
+          {rows.map(([n, lang, date, title]) => (
             <option key={n} value={n}>
-              {date} · {lang.toUpperCase()} · {n}
+              {date} · {title || lang.toUpperCase() + " · " + n}
             </option>
           ))}
         </select>
