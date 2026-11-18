@@ -3,10 +3,12 @@
   "private": true,
   "scripts": {
     "build:view": "bun build view.tsx --target browser --minify --outfile dist/layout.js",
-    "desktop": "bun run build:view && electrobun dev",
-    "check": "bun run build:view && python3 -m unittest && bun test",
-    "build": "bun run build:view && electrobun build",
-    "render:check": "bun run build:view && python3 tools/check-render.py"
+    "desktop": "bun run build:view && bun run build:cli && electrobun dev",
+    "check": "bun run build:view && bun test",
+    "build": "bun run build:view && bun run build:cli && electrobun build",
+    "render:check": "bun run build:view && bun tools/check-render.ts",
+    "xword": "bun xword.ts",
+    "build:cli": "bun build xword.ts --target bun --outfile dist/xword.js"
   },
   "dependencies": {
     "@ui-sdk/core": "^0.1.0-beta.10",

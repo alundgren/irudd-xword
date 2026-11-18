@@ -260,6 +260,17 @@ function App() {
   const [rows, setRows] = useState<Row[]>([]),
     [id, setId] = useState(0),
     [error, setError] = useState("");
+  async function generateEdition() {
+    try {
+      setError("");
+      const lang = rows.find((row) => row[0] === id)?.[1] || "sv";
+      const result = await request("/generate", { lang });
+      setRows(await request("/editions"));
+      setId(result.id);
+    } catch (e) {
+      setError(String(e));
+    }
+  }
   useEffect(() => {
     request("/editions")
       .then((list) => {
@@ -293,6 +304,9 @@ function App() {
       </header>
       {error}
       {id > 0 && <Puzzle key={id} id={id} />}
+      <Button className="action" onClick={generateEdition}>
+        Skapa nytt minikryss
+      </Button>
     </>
   );
 }

@@ -1,8 +1,8 @@
 # Making a morning edition
 
-Run `python3 app.py context --lang sv` privately to see earlier answers, positions and feedback. Use that history to change the subject, word mix, difficulty and clues. Free text such as “fewer names, more puns” is an editorial instruction for the author. Keep solutions and generation transcripts out of the player’s conversation. Use `--lang en` for English.
+Run `bun run xword context --lang sv` privately to see earlier answers, positions and feedback. Use that history to change the subject, word mix, difficulty and clues. Free text such as “fewer names, more puns” is an editorial instruction for the author. Keep solutions and generation transcripts out of the player’s conversation. Use `--lang en` for English.
 
-Start with `python3 app.py find --lang sv --pattern '?Ä?'` to look for possible crossings. The starter bank includes everyday words, people, places and original playful clues. Plain words can have pun clues too. Try the clue with a native speaker before giving an ambiguous pun a difficult crossing.
+Start with `bun run xword find --lang sv --pattern '?Ä?'` to look for possible crossings. The starter bank includes everyday words, people, places and original playful clues. Plain words can have pun clues too. Try the clue with a native speaker before giving an ambiguous pun a difficult crossing.
 
 Generate an original PNG. Create a private JSON pack with:
 
@@ -13,7 +13,7 @@ Generate an original PNG. Create a private JSON pack with:
 - Optional `fill: "dense"` selects interlocking strips for an illustrated grid with two picture answers. The bundled Swedish pack uses this setting. Supply an 8-letter or longer theme entry that can cross both answers, and enough everyday two- and three-letter words to fill short horizontal and vertical runs. Generated editions must give every answer at least two crossing letters and share at least 60% of distinct letter squares between answers. These are prototype playtesting thresholds. Authored grids and previously saved editions keep their original layout.
 - Optional `entries`: an array of `[answer, x, y, dx, dy]`. Coordinates start at zero at the top left, and identify the first letter. Directions are right or down; the preceding square holds the clue. Supply a connected grid up to 40×40 including its picture answer. The checker rejects mismatched crossings, overlapping parallel words, repeated answers, covered clues and accidental runs. Omit this field for a procedural mini.
 
-Run `python3 app.py generate --lang sv --pack path/to/edition.json`, then `python3 app.py validate --lang sv`. Reopen or reload the player for the new edition. Swedish is the default. Its bundled coastal pack makes two numbered picture clues and favours a mix of short and long answers. English keeps its single-picture mini. Custom packs in either language can use the illustrated grid. Local records live in `~/.local/share/irudd-xword`; set `XWORD_DATA` to try a separate collection.
+Run `bun run xword generate --lang sv --pack path/to/edition.json`, then `bun run xword validate --lang sv`. Reopen or reload the player for the new edition. Swedish is the default. Its bundled coastal pack makes two numbered picture clues and favours a mix of short and long answers. English keeps its single-picture mini. Custom packs in either language can use the illustrated grid. Local records live in `~/.local/share/irudd-xword`; set `XWORD_DATA` to try a separate collection.
 
 ## Vocabulary sources to explore
 

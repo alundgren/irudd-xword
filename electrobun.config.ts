@@ -3,18 +3,18 @@ export default {
   build: {
     mainProcess: "bun",
     bun: { entrypoint: "desktop.ts" },
-    copy: Object.fromEntries(
-      [
-        "app.py",
-        "engine.py",
-        "dense.py",
-        "words.tsv",
-        "index.html",
-        "illustration.png",
-        "coastal-detail.png",
-        "coast.sv.json",
-        "dist/layout.js",
-      ].map((file) => [file, "player/" + file]),
-    ),
+    copy: {
+      "dist/xword.js": "player/xword.js",
+      ...Object.fromEntries(
+        [
+          "words.tsv",
+          "index.html",
+          "illustration.png",
+          "coastal-detail.png",
+          "coast.sv.json",
+          "dist/layout.js",
+        ].map((file) => [file, "player/" + file]),
+      ),
+    },
   },
 };
