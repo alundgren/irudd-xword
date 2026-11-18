@@ -10,6 +10,8 @@ export default {
         "words.tsv",
         "index.html",
         "illustration.png",
+        "coastal-detail.png",
+        "coast.sv.json",
         "dist/layout.js",
       ].map((file) => [file, "player/" + file]),
     ),

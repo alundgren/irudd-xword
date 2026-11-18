@@ -1,0 +1,10 @@
+{
+  "layout": "illustrated-grid",
+  "generated_png": "illustration.png",
+  "picture_answer": "FYR",
+  "picture_clue": "Visar vägen i mörker",
+  "extra_pictures": [
+    {"generated_png": "coastal-detail.png", "answer": "LIVBOJ", "clue": "Kastas till den nödställde"}
+  ],
+  "words": {}
+}

@@ -9,7 +9,7 @@ from datetime import date
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlsplit
 
-from engine import ROOT, bank, check_layout, generate, inspect, path
+from engine import ROOT, bank, check_layout, generate, inspect, locate_pictures, path
 
 DATA = Path(os.environ.get('XWORD_DATA', Path.home() / '.local/share/irudd-xword'))
 DATA.mkdir(parents=True, exist_ok=True)
@@ -25,9 +25,20 @@ if 'layout' not in [r[1] for r in db.execute('PRAGMA table_info(editions)')]:
 db.execute("CREATE TABLE IF NOT EXISTS marks (edition INTEGER, cell TEXT, guess TEXT, PRIMARY KEY(edition,cell))")
 
 
+db.execute("CREATE TABLE IF NOT EXISTS panels (edition INTEGER, slot INTEGER, filename TEXT, rect TEXT, PRIMARY KEY(edition,slot))")
+
+
 def picture_path(filename):
     return (ROOT if filename == 'illustration.png' else DATA) / filename
 
+
+def store_picture(filename):
+    image = filename.read_bytes()
+    if not image.startswith(b'\x89PNG\r\n\x1a\n'):
+        raise ValueError('Expected generated PNG')
+    name = sha256(image).hexdigest() + '.png'
+    picture_path(name).write_bytes(image)
+    return name
 
 
 def history(lang):
@@ -40,32 +51,48 @@ def edition(lang, pack=None):
     picture = 'illustration.png'
     layout = LAYOUTS[len(history(lang)) % len(LAYOUTS)]
     spec = {}
+    pictures = {}
+    if not pack and lang == "sv":
+        pack = ROOT / "coast.sv.json"
     if pack:
         spec = json.loads(Path(pack).read_text())
         layout = spec.get('layout', layout)
-        if layout not in LAYOUTS:
+        if layout not in (*LAYOUTS, 'illustrated-grid'):
             raise ValueError('Unknown layout')
-        image = (Path(pack).parent / spec['generated_png']).read_bytes()
-        if not image.startswith(b'\x89PNG\r\n\x1a\n'):
-            raise ValueError('Expected generated PNG')
-        picture = sha256(image).hexdigest() + '.png'
-        picture_path(picture).write_bytes(image)
-        words = {**{spec['picture_answer'].upper(): spec['picture_clue']}, **spec.get('words', {})}
+        folder = Path(pack).parent
+        picture = store_picture(folder / spec['generated_png'])
+        anchor = spec['picture_answer'].upper()
+        words = {anchor: spec['picture_clue'], **spec.get('words', {})}
+        if layout == 'illustrated-grid':
+            pictures[anchor] = picture
+            for extra in spec.get('extra_pictures', []):
+                word = extra['answer'].upper()
+                if word in pictures:
+                    raise ValueError('Use a different answer for each picture')
+                pictures[word] = store_picture(folder / extra['generated_png'])
+                words[word] = extra['clue']
+            for slot, word in enumerate(pictures, 1):
+                words[word] = f"Bild {slot} · {words[word]}"
+        elif spec.get('extra_pictures'):
+            raise ValueError('Additional pictures require illustrated-grid')
         for w, c in bank(lang).items():
             if w != next(iter(bank(lang))):
                 words.setdefault(w, c)
         for w, c in words.items():
-            if not re.fullmatch('[A-ZÅÄÖ]{2,10}', w) or not isinstance(c, str) or not c.strip():
-                raise ValueError('Expected uppercase entries of 2–10 letters and nonempty clues')
+            if not re.fullmatch('[A-ZÅÄÖ]{2,30}', w) or not isinstance(c, str) or not c.strip():
+                raise ValueError('Expected uppercase entries of 2–30 letters and nonempty clues')
     entries = spec.get('entries')
     if entries is None:
-        entries = generate(lang, history(lang), words=words)
+        entries = generate(lang, history(lang), words=words, picture_answers=tuple(pictures))
     check_layout(entries, words)
     if not any(e[0] == next(iter(words)) for e in entries):
         raise ValueError('The grid must include the picture answer')
+    rectangles = locate_pictures(entries, pictures) if pictures else []
     with db:
         row = db.execute('INSERT INTO editions(lang,day,entries,clues,picture,layout) VALUES(?,?,?,?,?,?)',
                          (lang, date.today().isoformat(), json.dumps(entries), json.dumps([words[e[0]] for e in entries]), picture, layout))
+        db.executemany("INSERT INTO panels VALUES(?,?,?,?)",
+                       [(row.lastrowid, n, filename, json.dumps(rect)) for n, (filename, rect) in enumerate(zip(pictures.values(), rectangles), 1)])
     return row.lastrowid
 
 
@@ -90,6 +117,11 @@ class Handler(BaseHTTPRequestHandler):
             row = db.execute('SELECT picture FROM editions WHERE id=?', m.groups()).fetchone()
             if row:
                 return self.reply(picture_path(row[0]).read_bytes(), 'image/png')
+        panel = re.fullmatch(r'/panel/(\d+)/(\d+)', route)
+        if panel:
+            row = db.execute('SELECT filename FROM panels WHERE edition=? AND slot=?', panel.groups()).fetchone()
+            if row:
+                return self.reply(picture_path(row[0]).read_bytes(), 'image/png')
         if route == '/editions':
             rows = db.execute('SELECT id,lang,day FROM editions ORDER BY id DESC').fetchall()
             return self.reply(rows)
@@ -99,7 +131,9 @@ class Handler(BaseHTTPRequestHandler):
             if row:
                 entries, clues, feedback, layout = row
                 guesses = dict(db.execute("SELECT cell, guess FROM marks WHERE edition=?", match.groups()))
-                return self.reply(dict(entries=[dict(cells=path(e), direction=e[3:], clue=c)
+                panels = [dict(slot=i, rect=json.loads(rect)) for i,rect in db.execute(
+                    'SELECT slot,rect FROM panels WHERE edition=? ORDER BY slot', match.groups())]
+                return self.reply(dict(panels=panels, entries=[dict(cells=path(e), direction=e[3:], clue=c)
                                                 for e, c in zip(json.loads(entries), json.loads(clues))], feedback=feedback, layout=layout, guesses=guesses))
         self.reply({}, status=404)
 

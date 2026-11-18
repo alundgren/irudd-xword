@@ -14,6 +14,7 @@ type Entry = { cells: Cell[]; direction: Cell; clue: string };
 type Edition = {
   entries: Entry[];
   layout: string;
+  panels: { slot: number; rect: [number, number, number, number] }[];
   guesses: Record<string, string>;
   feedback: string;
 };
@@ -32,7 +33,7 @@ async function request(route: string, data?: object) {
 }
 const Player = createContext<any>(null);
 function Crossword() {
-  const { edition, selected, setSelected, guesses, mark, wrong } =
+  const { id, edition, selected, setSelected, guesses, mark, wrong } =
     useContext(Player);
   const entries: Entry[] = edition.entries;
   const fields = useRef(new Map<string, HTMLInputElement>());
@@ -48,10 +49,14 @@ function Crossword() {
     ...cells.values(),
     ...Array.from(clues.values(), (c) => c.pos),
   ];
+  const columns = 1 + Math.max(...positions.map((p) => p[0]));
+  const size = `clamp(42px, calc((100cqw - ${columns + 2}px) / ${columns}), 62px)`;
   const tracks = (axis: number) =>
     "repeat(" +
     (1 + Math.max(...positions.map((p) => p[axis]))) +
-    ",clamp(42px,6vw,62px))";
+    "," +
+    size +
+    ")";
   const at = ([x, y]: Cell) => ({ gridColumn: x + 1, gridRow: y + 1 });
   const active = entries[selected].cells.map(String);
   return (
@@ -60,6 +65,24 @@ function Crossword() {
         id="grid"
         style={{ gridTemplateColumns: tracks(0), gridTemplateRows: tracks(1) }}
       >
+        {edition.panels.map(
+          ({
+            slot,
+            rect: [x, y, width, height],
+          }: Edition["panels"][number]) => (
+            <figure
+              className="panel"
+              key={slot}
+              style={{
+                gridColumn: x + 1 + " / span " + width,
+                gridRow: y + 1 + " / span " + height,
+              }}
+            >
+              <img src={`/panel/${id}/${slot}`} alt={`Bildledtråd ${slot}`} />
+              <figcaption>{slot}</figcaption>
+            </figure>
+          ),
+        )}
         {[...clues].map(([key, { pos, ids }]) => (
           <div key={"clue" + key} className="box" style={at(pos)}>
             {ids.map((i) => (
@@ -181,7 +204,7 @@ function Puzzle({ id }: { id: number }) {
       value={{ id, edition, guesses, selected, setSelected, wrong, mark }}
     >
       <div className={"page " + layout}>
-        {layout !== "grid-first" && picture}
+        {layout !== "grid-first" && layout !== "illustrated-grid" && picture}
         <Crossword />
         {layout === "grid-first" && picture}
       </div>

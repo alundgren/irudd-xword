@@ -2,7 +2,12 @@ import { Schema } from "effect";
 import { nearestInDirection } from "@ui-sdk/core";
 
 export const pageLayout = Schema.decodeUnknownSync(
-  Schema.Literals(["picture-first", "grid-first", "side-by-side"]),
+  Schema.Literals([
+    "picture-first",
+    "grid-first",
+    "side-by-side",
+    "illustrated-grid",
+  ]),
 );
 
 export type Cell = [number, number];

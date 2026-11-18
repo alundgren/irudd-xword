@@ -34,6 +34,25 @@ class PlayerTest(unittest.TestCase):
                 route = '/p/' + str(edition)
                 p = read(route)
                 self.assertTrue(all(set(e) == {'cells','direction','clue'} for e in p['entries']))
+                self.assertEqual(p['layout'], 'illustrated-grid')
+                self.assertEqual(len(p['panels']), 2)
+                lengths = [len(e['cells']) for e in p['entries']]
+                self.assertLessEqual(min(lengths), 3)
+                self.assertGreaterEqual(max(lengths), 8)
+                occupied = set()
+                for entry in p['entries']:
+                    occupied.update(map(tuple, entry['cells']))
+                    x,y = entry['cells'][0]
+                    dx,dy = entry['direction']
+                    occupied.add((x-dx,y-dy))
+                for panel in p['panels']:
+                    x,y,w,h = panel['rect']
+                    cells = {(i,j) for i in range(x,x+w) for j in range(y,y+h)}
+                    self.assertTrue(cells.isdisjoint(occupied))
+                    occupied.update(cells)
+                    with urlopen(f"{url}/panel/{edition}/{panel['slot']}") as img:
+                        self.assertEqual(img.read(8), b'\x89PNG\r\n\x1a\n')
+                self.assertEqual(read('/p/'+str(rows[1][0]))['panels'], [])
                 cell = ','.join(map(str,p['entries'][0]['cells'][0]))
                 read('/mark', dict(id=edition,cell=cell,value='A'))
                 self.assertEqual(read(route)['guesses'], {cell:'A'})
