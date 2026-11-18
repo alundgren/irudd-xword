@@ -1,0 +1,18 @@
+{
+  "name": "irudd-xword",
+  "private": true,
+  "scripts": {
+    "build:view": "bun build view.tsx --target browser --minify --outfile dist/layout.js",
+    "desktop": "bun run build:view && electrobun dev",
+    "check": "bun run build:view && python3 -m unittest && bun test",
+    "build": "bun run build:view && electrobun build"
+  },
+  "dependencies": {
+    "@ui-sdk/core": "^0.1.0-beta.10",
+    "@ui-sdk/react": "^0.1.0-beta.10",
+    "effect": "^4.1.4",
+    "electrobun": "^2.0.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}
