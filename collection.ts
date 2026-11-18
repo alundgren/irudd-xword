@@ -22,6 +22,8 @@ import {
 } from "./grid";
 import { generate } from "./generate";
 
+import { dailyBrief, clueBank, type ClueVoice, type Paper } from "./styles";
+
 export function bank(root: string, lang: string): Words {
   const rows = readFileSync(join(root, "words.tsv"), "utf8")
     .trimEnd()
@@ -36,6 +38,8 @@ type EditionRow = {
   lang: string;
   day: string;
   title: string;
+  voice: ClueVoice;
+  paper: Paper;
   entries: string;
   clues: string;
   layout: string;
@@ -66,6 +70,9 @@ export class Collection {
           ["picture", "illustration.png"],
           ["layout", "picture-first"],
           ["title", ""],
+          ["voice", "classic"],
+          ["paper", "newsprint"],
+          ["editorial_note", ""],
         ]) {
           if (!columns.some((c) => c.name === name))
             this.db.exec(
@@ -83,16 +90,25 @@ export class Collection {
       .query("SELECT id,lang,day,title FROM editions ORDER BY day DESC,id DESC")
       .values();
   }
+  recentEditions(lang: string, day: string) {
+    return this.db
+      .query(
+        "SELECT day,title,voice,paper,editorial_note,feedback FROM editions WHERE lang=? AND day<=? ORDER BY day DESC,id DESC LIMIT 6",
+      )
+      .all(lang, day);
+  }
   history(lang: string) {
     return (
       this.db
         .query(
-          "SELECT id,day,entries,feedback FROM editions WHERE lang=? ORDER BY id",
+          "SELECT id,day,paper,voice,entries,feedback FROM editions WHERE lang=? ORDER BY id",
         )
         .all(lang) as EditionRow[]
-    ).map(({ id, day, entries, feedback }) => ({
+    ).map(({ id, day, paper, voice, entries, feedback }) => ({
       id,
       day,
+      voice,
+      paper,
       entries: JSON.parse(entries) as Entry[],
       feedback,
     }));
@@ -116,6 +132,7 @@ export class Collection {
       })),
       feedback: row.feedback,
       layout: row.layout,
+      paper: row.paper,
       guesses: Object.fromEntries(
         this.db
           .query("SELECT cell,guess FROM marks WHERE edition=?")
@@ -166,7 +183,12 @@ export class Collection {
     }
     return name;
   }
-  publish(lang: string, file?: string) {
+  publish(
+    lang: string,
+    file?: string,
+    options: { day?: string; voice?: string; paper?: string } = {},
+  ) {
+    const builtin = !file;
     if (lang !== "sv" && lang !== "en") throw Error("Choose sv or en");
     if (!file && lang === "sv") file = join(this.root, "coast.sv.json");
     const previous = this.history(lang);
@@ -174,17 +196,30 @@ export class Collection {
     const pack: Partial<Pack> = file
       ? JSON.parse(readFileSync(file, "utf8"))
       : {};
+    const day =
+      options.day ?? pack.edition_day ?? new Date().toLocaleDateString("sv-SE");
+    const { voice, paper } = dailyBrief(
+      day,
+      options.voice ?? pack.voice,
+      undefined,
+      options.paper ?? pack.paper,
+    );
     const layout = pack.layout ?? layouts[previous.length % 3];
     if (![...layouts, "illustrated-grid"].includes(layout))
       throw Error("Unknown layout");
-    let words = bank(this.root, lang),
+    let words = clueBank(bank(this.root, lang), lang, voice),
       picture = "illustration.png";
     const panels = new Map<string, string>();
     const anchor = file
       ? pack.picture_answer!.toUpperCase()
       : Object.keys(words)[0];
     if (file) {
-      picture = this.storePicture(resolve(dirname(file), pack.generated_png!));
+      picture = this.storePicture(
+        resolve(
+          dirname(file),
+          pack.art_by_paper?.[paper] ?? pack.generated_png!,
+        ),
+      );
       delete words[Object.keys(words)[0]];
       words = {
         [anchor]: pack.picture_clue!,
@@ -202,7 +237,12 @@ export class Collection {
           if (panels.has(w)) throw Error("Duplicate picture answer");
           panels.set(
             w,
-            this.storePicture(resolve(dirname(file), extra.generated_png)),
+            this.storePicture(
+              resolve(
+                dirname(file),
+                extra.art_by_paper?.[paper] ?? extra.generated_png,
+              ),
+            ),
           );
           words[w] = extra.clue;
         }
@@ -211,6 +251,7 @@ export class Collection {
       for (const [w, c] of Object.entries(words))
         if (!/^[A-ZÅÄÖ]{2,30}$/.test(w) || typeof c !== "string" || !c.trim())
           throw Error("Invalid answer or blank clue");
+      if (builtin) words = clueBank(words, lang, voice);
       [...panels.keys()].forEach((w, i) => {
         words[w] = `Bild ${i + 1} · ${words[w]}`;
       });
@@ -237,16 +278,10 @@ export class Collection {
     const rects = pack.picture_rect
       ? [pack.picture_rect]
       : pictures(entries, [...panels.keys()]);
-    const day = pack.edition_day ?? new Date().toLocaleDateString("sv-SE");
-    if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(day) ||
-      new Date(day + "T12:00:00Z").toISOString().slice(0, 10) !== day
-    )
-      throw Error("Invalid edition date");
     return this.db.transaction(() => {
       const { lastInsertRowid: id } = this.db
         .query(
-          "INSERT INTO editions(lang,day,entries,clues,picture,layout,title) VALUES(?,?,?,?,?,?,?)",
+          "INSERT INTO editions(lang,day,entries,clues,picture,layout,title,voice,paper,editorial_note) VALUES(?,?,?,?,?,?,?,?,?,?)",
         )
         .run(
           lang,
@@ -256,6 +291,9 @@ export class Collection {
           picture,
           layout,
           pack.title?.trim() ?? "",
+          voice,
+          paper,
+          pack.editorial_note?.trim() ?? "",
         );
       [...panels.values()].forEach((name, i) =>
         this.db

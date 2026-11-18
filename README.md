@@ -25,3 +25,5 @@ Use **Skapa nytt minikryss** to generate a mini in the selected language. For ne
 app="$HOME/Applications/Morgonkryss.app/Contents"
 "$app/MacOS/bun" "$app/Resources/app/player/xword.js" --help
 ```
+
+In the player, **Utgåvans stil** lets you try Krittavla, Verkstadsritning and Tidningspapper as you solve. For dated puzzles, `bun run xword brief --day YYYY-MM-DD` reads recent feedback and suggests the clue voice, page and picture composition. See the [constructor notes and style controls](AUTHORING.md#vary-the-next-edition).

@@ -55,6 +55,7 @@ try {
   ).version;
   const mounts = [
     [temp, "data"],
+    [join(root, "fonts"), "fonts"],
     [join(root, "tools/render.mjs"), "render.mjs"],
     [join(root, "dist/layout.js"), "layout.js"],
     [join(root, "index.html"), "index.html"],

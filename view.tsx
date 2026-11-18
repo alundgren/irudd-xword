@@ -14,6 +14,7 @@ type Entry = { cells: Cell[]; direction: Cell; clue: string };
 type Edition = {
   entries: Entry[];
   layout: string;
+  paper: string;
   panels: { slot: number; rect: [number, number, number, number] }[];
   guesses: Record<string, string>;
   feedback: string;
@@ -165,7 +166,7 @@ function Crossword() {
     </div>
   );
 }
-function Puzzle({ id }: { id: number }) {
+function Puzzle({ id, preview }: { id: number; preview: string }) {
   const [edition, setEdition] = useState<Edition>();
   const [guesses, setGuesses] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState("");
@@ -203,7 +204,7 @@ function Puzzle({ id }: { id: number }) {
     <Player.Provider
       value={{ id, edition, guesses, selected, setSelected, wrong, mark }}
     >
-      <div className={"page " + layout}>
+      <div className={"page " + layout} data-print={preview || edition.paper}>
         {layout !== "grid-first" && layout !== "illustrated-grid" && picture}
         <Crossword />
         {layout === "grid-first" && picture}
@@ -257,6 +258,7 @@ function Puzzle({ id }: { id: number }) {
   );
 }
 function App() {
+  const [preview, setPreview] = useState("");
   const [rows, setRows] = useState<Row[]>([]),
     [id, setId] = useState(0),
     [error, setError] = useState("");
@@ -266,6 +268,7 @@ function App() {
       const lang = rows.find((row) => row[0] === id)?.[1] || "sv";
       const result = await request("/generate", { lang });
       setRows(await request("/editions"));
+      setPreview("");
       setId(result.id);
     } catch (e) {
       setError(String(e));
@@ -290,20 +293,35 @@ function App() {
     <>
       <header>
         <h1>Morgonkryss</h1>
-        <select
-          aria-label="Utgåva"
-          value={id}
-          onChange={(e) => setId(Number(e.target.value))}
-        >
-          {rows.map(([n, lang, date, title]) => (
-            <option key={n} value={n}>
-              {date} · {title || lang.toUpperCase() + " · " + n}
-            </option>
-          ))}
-        </select>
+        <div className="edition-tools">
+          <select
+            aria-label="Tryckstil"
+            value={preview}
+            onChange={(event) => setPreview(event.target.value)}
+          >
+            <option value="">Utgåvans stil</option>
+            <option value="newsprint">Tidningspapper</option>
+            <option value="chalk">Krittavla</option>
+            <option value="mechanical">Verkstadsritning</option>
+          </select>
+          <select
+            aria-label="Utgåva"
+            value={id}
+            onChange={(e) => {
+              setPreview("");
+              setId(Number(e.target.value));
+            }}
+          >
+            {rows.map(([n, lang, date, title]) => (
+              <option key={n} value={n}>
+                {date} · {title || lang.toUpperCase() + " · " + n}
+              </option>
+            ))}
+          </select>
+        </div>
       </header>
       {error}
-      {id > 0 && <Puzzle key={id} id={id} />}
+      {id > 0 && <Puzzle key={id} id={id} preview={preview} />}
       <Button className="action" onClick={generateEdition}>
         Skapa nytt minikryss
       </Button>

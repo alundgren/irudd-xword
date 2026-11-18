@@ -5,6 +5,16 @@
     content="width=device-width,initial-scale=1"
   /><title>Morgonkryss</title>
   <style>
+    @font-face {
+      font-family: Krysskrita;
+      src: url("/fonts/Krysskrita.otf") format("opentype");
+      font-display: swap;
+    }
+    @font-face {
+      font-family: Rutverk;
+      src: url("/fonts/Rutverk.otf") format("opentype");
+      font-display: swap;
+    }
     * {
       box-sizing: border-box;
     }
@@ -24,6 +34,13 @@
       padding: 10px 0;
       gap: 10px;
     }
+    .edition-tools {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 5px;
+      min-width: 0;
+    }
     header select {
       min-width: 0;
       max-width: 100%;
@@ -32,8 +49,12 @@
       header {
         flex-wrap: wrap;
       }
-      header select {
+      .edition-tools {
+        justify-content: flex-start;
         width: 100%;
+      }
+      header select {
+        max-width: 100%;
       }
     }
     h1 {
@@ -175,6 +196,98 @@
     }
     .illustrated-grid #grid {
       margin-inline: 0;
+    }
+
+    body:has([data-print="chalk"]) {
+      background: #233735;
+      color: #fbf1da;
+      --lettering: Krysskrita, sans-serif;
+      --key-fill: #304643;
+      --key-ink: #fff8df;
+      --box-fill: #435957;
+      --box-ink: #fff9e8;
+      --grid-line: #a7b5a9;
+      --selected: #f4dea0;
+    }
+    body:has([data-print="mechanical"]) {
+      background: #f0f3ee;
+      color: #19394f;
+      --lettering: Rutverk, monospace;
+      --key-fill: #fdfdfa;
+      --key-ink: #173e54;
+      --box-fill: #dae7e9;
+      --box-ink: #12374c;
+      --grid-line: #819ba5;
+      --selected: #f9dbab;
+    }
+    body:has([data-print="chalk"]) header {
+      border-bottom: 2px dashed #b7c8ba;
+    }
+    body:has([data-print="mechanical"]) header {
+      border-block: 1px solid #426275;
+    }
+    body:has([data-print="chalk"], [data-print="mechanical"]) h1 {
+      font-family: var(--lettering);
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      line-height: 1.1;
+    }
+    body:has([data-print="chalk"]) h1 {
+      color: #eadaaf;
+      transform: rotate(-1deg);
+      transform-origin: left bottom;
+    }
+    .page:is([data-print="chalk"], [data-print="mechanical"]) #grid {
+      background-color: var(--grid-line);
+      border-color: var(--grid-line);
+    }
+    .page:is([data-print="chalk"], [data-print="mechanical"]) .cell {
+      background: var(--key-fill);
+      color: var(--key-ink);
+      font: 400 25px var(--lettering);
+    }
+    .page:is([data-print="chalk"], [data-print="mechanical"]) .cell.active {
+      background: var(--selected);
+      color: #243633;
+    }
+    .page:is([data-print="chalk"], [data-print="mechanical"]) .box {
+      background: var(--box-fill);
+    }
+    .page:is([data-print="chalk"], [data-print="mechanical"]) .clue {
+      color: var(--box-ink);
+    }
+    .page[data-print="chalk"] .cell.bad {
+      box-shadow: inset 0 0 0 3px #f07559;
+    }
+    .page[data-print="chalk"] .cell:focus {
+      outline-color: #5eb9cb;
+    }
+    .page[data-print="chalk"] .clue + .clue {
+      border-top: 1px dashed #a7b5a9;
+    }
+    .page:is([data-print="chalk"], [data-print="mechanical"]) .panel img {
+      object-fit: contain;
+    }
+    .page[data-print="chalk"] .panel {
+      background-color: #172a22;
+    }
+    .page[data-print="mechanical"] .panel {
+      background-color: #f7e5bf;
+    }
+    .page[data-print="chalk"] .panel figcaption {
+      background: #304643;
+      border: 1px solid #f4dea0;
+      font-family: Krysskrita, sans-serif;
+    }
+    .page[data-print="mechanical"] .panel figcaption {
+      border-radius: 0;
+      background: #19394f;
+      font-family: Rutverk, monospace;
+    }
+    .page[data-print="mechanical"] #grid {
+      outline: 1px solid #426275;
+      outline-offset: 2px;
     }
   </style>
   <main id="app"></main>

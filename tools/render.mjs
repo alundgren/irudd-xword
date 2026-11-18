@@ -7,6 +7,8 @@ const rows = JSON.parse(await readFile(root + "/data/editions.json"));
 const edition = rows[0][0];
 const files = new Map([
   ["/", ["index.html", "text/html"]],
+  ["/fonts/Krysskrita.otf", ["fonts/Krysskrita.otf", "font/otf"]],
+  ["/fonts/Rutverk.otf", ["fonts/Rutverk.otf", "font/otf"]],
   ["/layout.js", ["layout.js", "text/javascript"]],
   ["/editions", ["data/editions.json", "application/json"]],
   ["/p/" + edition, ["data/edition.json", "application/json"]],
@@ -81,6 +83,16 @@ try {
       await document.fonts.ready;
       await Promise.all([...document.images].map((img) => img.decode()));
     });
+    const face = { chalk: "Krysskrita", mechanical: "Rutverk" }[puzzle.paper];
+    if (
+      face &&
+      !(await page.evaluate(
+        (font) => getComputedStyle(document.querySelector(".cell")).fontFamily.includes(font)
+          && [...document.fonts].some(face => face.family === font && face.status === "loaded"),
+        face,
+      ))
+    )
+      throw Error("Edition font failed to load: " + face);
     const failures = await page.evaluate(inspectClues);
     const screenshot = `edition-${edition}-${width}.png`;
     await page.screenshot({ path: "/out/" + screenshot, fullPage: true });

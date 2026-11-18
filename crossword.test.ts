@@ -1,9 +1,10 @@
 import { expect, test } from "bun:test";
 import { Database } from "bun:sqlite";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Collection } from "./collection";
+import { dailyBrief, clueBank } from "./styles";
 import { serve } from "./player";
 import { cells, checkRect, validate, type Entry } from "./grid";
 import { seeded, fill, layout } from "./newspaper";
@@ -15,6 +16,9 @@ test("legacy storage, dense and English generation, public projection and persis
   });
   old.exec(
     "CREATE TABLE editions(id INTEGER PRIMARY KEY,lang TEXT,day TEXT,entries TEXT,clues TEXT,feedback TEXT DEFAULT '')",
+  );
+  old.exec(
+    "INSERT INTO editions(lang,day,entries,clues) VALUES('en','2025-01-02','[]','[]')",
   );
   old.close();
   let library = new Collection(import.meta.dir, directory);
@@ -31,6 +35,8 @@ test("legacy storage, dense and English generation, public projection and persis
           body: JSON.stringify(data),
         })
       ).json();
+    expect(library.row(1)!.paper).toBe("newsprint");
+    expect(library.row(1)!.voice).toBe("classic");
     const [[id]] = await get("editions");
     const puzzle = await get("p/" + id);
     expect(puzzle.panels.length).toBe(2);
@@ -127,28 +133,105 @@ test("newspaper slot solver preserves unique words and crossings", () => {
 
 test("newspaper page sizes leave the picture clear and every answer crossed twice", () => {
   for (const large of [true, false])
-    for (let seed = 0; seed < 10; seed++) {
-      const {
-        slots,
-        rect: [x, y, w, h],
-      } = layout(large, seeded(seed));
-      const counts = new Map<string, number>();
-      for (const slot of slots)
-        for (const p of slot)
-          counts.set(String(p), (counts.get(String(p)) ?? 0) + 1);
-      const dimensions = [0, 1].map(
-        (axis) => 1 + Math.max(...slots.flat().map((p) => p[axis])),
-      );
-      expect(dimensions).toEqual(large ? [17, 19] : [8, 10]);
-      expect(
-        slots.every(
-          (slot) => slot.filter((p) => counts.get(String(p)) === 2).length >= 2,
-        ),
-      ).toBe(true);
-      expect(
-        slots
-          .flat()
-          .every(([cx, cy]) => cx < x || cy < y || cx >= x + w || cy >= y + h),
-      ).toBe(true);
-    }
+    for (const corner of ["left", "right"] as const)
+      for (let seed = 0; seed < 10; seed++) {
+        const {
+          slots,
+          rect: [x, y, w, h],
+        } = layout(large, seeded(seed), corner);
+        expect(x === 0).toBe(corner === "left");
+        for (const slot of slots) {
+          const [a, b] = slot;
+          const cx = 2 * a[0] - b[0],
+            cy = 2 * a[1] - b[1];
+          expect(cx < x || cy < y || cx >= x + w || cy >= y + h).toBe(true);
+        }
+        const counts = new Map<string, number>();
+        for (const slot of slots)
+          for (const p of slot)
+            counts.set(String(p), (counts.get(String(p)) ?? 0) + 1);
+        const dimensions = [0, 1].map(
+          (axis) => 1 + Math.max(...slots.flat().map((p) => p[axis])),
+        );
+        expect(dimensions).toEqual(large ? [17, 19] : [8, 10]);
+        expect(
+          slots.every(
+            (slot) =>
+              slot.filter((p) => counts.get(String(p)) === 2).length >= 2,
+          ),
+        ).toBe(true);
+        expect(
+          slots
+            .flat()
+            .every(
+              ([cx, cy]) => cx < x || cy < y || cx >= x + w || cy >= y + h,
+            ),
+        ).toBe(true);
+      }
+});
+
+test("briefs rotate across calendar boundaries and accept independent editorial choices", () => {
+  const days = Array.from({ length: 9 }, (_, i) =>
+    new Date(Date.UTC(2026, 11, 28 + i)).toISOString().slice(0, 10),
+  );
+  const briefs = days.map((day) => dailyBrief(day));
+  expect(new Set(briefs.map((b) => b.paper + "/" + b.voice)).size).toBe(9);
+  expect(dailyBrief(days[0])).toEqual(briefs[0]);
+  expect(dailyBrief(days[0], "fieldnotes", "right", "chalk")).toMatchObject({
+    voice: "fieldnotes",
+    paper: "chalk",
+    picture_corner: "right",
+  });
+  expect(() => dailyBrief("2026-02-29")).toThrow();
+  expect(() => dailyBrief(days[0], "other")).toThrow();
+  expect(() => dailyBrief(days[0], undefined, undefined, "other")).toThrow();
+  expect(clueBank({ ASK: "Request" }, "en", "wordplay")).toEqual({
+    ASK: "Request",
+  });
+});
+
+test("saved illustrations and authored clues survive publication and changing daily defaults", () => {
+  const directory = mkdtempSync(join(tmpdir(), "xword-style-"));
+  const library = new Collection(import.meta.dir, directory);
+  try {
+    const options = { day: "2026-11-20", paper: "chalk", voice: "wordplay" };
+    const demo = library.row(library.publish("sv", undefined, options))!;
+    const first = library.publicPuzzle(demo);
+    expect(
+      first.entries.some(
+        (e) => e.clue.startsWith("Bild 1 · ") && e.clue.endsWith("?"),
+      ),
+    ).toBe(true);
+    const custom = JSON.parse(
+      readFileSync(join(import.meta.dir, "coast.sv.json"), "utf8"),
+    );
+    custom.entries = JSON.parse(demo.entries);
+    custom.generated_png = join(import.meta.dir, custom.generated_png);
+    delete custom.art_by_paper;
+    custom.extra_pictures[0].generated_png = join(
+      import.meta.dir,
+      custom.extra_pictures[0].generated_png,
+    );
+    delete custom.extra_pictures[0].art_by_paper;
+    custom.picture_clue = "Min bildnyckel";
+    custom.editorial_note = "En närbild vid kajen";
+    const file = join(directory, "pack.json");
+    writeFileSync(file, JSON.stringify(custom));
+    const saved = library.row(library.publish("sv", file, options))!;
+    expect(saved.picture).not.toBe(demo.picture);
+    const visible = library.publicPuzzle(saved);
+    expect(
+      visible.entries.some((e) => e.clue === "Bild 1 · Min bildnyckel"),
+    ).toBe(true);
+    expect(visible.paper).toBe("chalk");
+    expect(visible).not.toHaveProperty("editorial_note");
+    expect(library.recentEditions("sv", options.day)[0]).toMatchObject({
+      editorial_note: custom.editorial_note,
+      voice: "wordplay",
+    });
+    expect(library.recentEditions("sv", "2026-11-19")).toHaveLength(0);
+  } finally {
+    library.db.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
 });

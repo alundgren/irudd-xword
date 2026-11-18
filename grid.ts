@@ -1,19 +1,26 @@
+import type { Paper, ClueVoice } from "./styles";
 export type Cell = [number, number];
 export type Entry = [string, number, number, number, number];
 export type Rect = [number, number, number, number];
 export type Words = Record<string, string>;
-export type Pack = {
+type Illustration = {
+  generated_png: string;
+  art_by_paper?: Partial<Record<Paper, string>>;
+};
+export type Pack = Illustration & {
   picture_answer: string;
   picture_clue: string;
-  generated_png: string;
   layout?: string;
   fill?: string;
   words?: Words;
   entries?: Entry[];
-  extra_pictures?: { answer: string; clue: string; generated_png: string }[];
+  extra_pictures?: (Illustration & { answer: string; clue: string })[];
   picture_rect?: Rect;
   edition_day?: string;
+  paper?: Paper;
+  voice?: ClueVoice;
   title?: string;
+  editorial_note?: string;
 };
 export const directions: Cell[] = [
   [1, 0],

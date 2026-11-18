@@ -32,6 +32,25 @@ Bengt Carlson describes starting with two long entries and limiting clusters of 
 
 Crossword Compiler gives pictures whole-cell rectangular footprints. Its clue cells can split, wrap text and explicitly assign arrows to answers, including corner arrows. Explicit arrow routing and highlighted picture phrases would be worthwhile experiments after testing the current straight-arrow version. [Picture placement](https://crossword-compiler.com/en/help/html/addingimagestoapuzzle.htm) · [Clue cells](https://www.crossword-compiler.com/en/help/html/cluesquares.htm)
 
+## Vary the next edition
+
+Tobias Burnesson describes choosing a theme and picture, laying a word or phrase into the grid, then weaving the crossings. His weekly subjects include local calendar events. For our morning editions, choose a scene someone could recognize this week. For the train edition, one object and one quick insight can carry the whole picture. [Burnesson in Landskrona Direkt](https://www.landskronadirekt.com/2020/01/31/ett-jobb-pa-kors-och-tvars/)
+
+Maria Argiroudaki describes the work of fitting a short, funny, fresh clue into a little square. Her family also recalls a replacement illustration that broke a puzzle's joke. Write down the detail that makes the clue fair before generating the picture. Inspect that detail in the actual grid crop. A beautiful drawing of the wrong moment needs another pass. [Constructor interview in Språktidningen](https://spraktidningen.se/okategoriserade/tre-generationer-ratt-i-krysset/)
+
+Lena Holmlund uses a question mark to tell the solver to try another reading. An original example for a practice grid is *Har blad i vattnet* for ÅRA on an observational day and *Har blad utan att växa?* on a playful one. Put a direct clue through one of its useful letters so the solver can discover the joke through crossings. [Holmlund in Arbetet](https://arbetet.se/2020/09/18/lena-holmlund-kan-korsordets-abc/)
+
+Run `bun run xword brief --day YYYY-MM-DD` before choosing the picture. It returns a repeatable starting point and the six most recent editions up through that date, including their private editorial notes and solver feedback. Read `context` if you also need the past answer lists. Use the feedback to choose what to repeat or change. For example, “I liked the jokes but got stuck on the names” is a reason to keep the playful voice and give a name two familiar crossings. Keep a sentence in the pack's optional `editorial_note` recording which subject, picture detail and clue device you actually used. The player does not display this note.
+
+| Authoring choice | What to try |
+| --- | --- |
+| Clue voice | `classic` mixes concise definitions and familiar names. `fieldnotes` uses an observable detail or action. `wordplay` introduces a second meaning among direct entry points. Review the individual keys in all three. |
+| Paper and lettering | `newsprint` uses a warm page and serif masthead. `chalk` uses a slate board and rounded Krysskrita capitals. `mechanical` uses drafting rules and angular Rutverk capitals. Compact clues use system type for legibility. The original display fonts include A–Z, ÅÄÖ and digits. Rebuild from their stroke drawings with `bun run build:fonts`. |
+| Picture composition | Try an object, an action, a relationship between two subjects, or a recognizable place. The daily brief proposes a composition and medium. The bundled Swedish mini has separately generated chalk and technical-ink plates. For an authored picture use `generated_png`, with an optional `art_by_paper` map of alternative generated PNGs showing the same subject. |
+| Grid | A dated newspaper draft can reserve its picture in either upper corner. Test a different seed for new connections and word lengths. Compare the least-crossed answer and where easy starting clues sit on the page. |
+
+Pass `--day`, `--voice`, `--paper` and `--corner` to `draft` to try a combination, for example `--voice wordplay --paper chalk --corner right`. The draft stores its settings, actual picture rectangle and suggested clues. Open the player's **Tryckstil** menu to preview the same puzzle on another paper. Previewing preserves the answers, artwork and saved progress.
+
 ## Check the rendered edition
 
 With Docker running and the local player serving editions, run `bun run render:check 6` (replace 6 with the saved edition ID). It rebuilds the current view, reads the edition from port 8766, then renders a blank copy with WebKit inside a Linux container. The first run downloads the matching Playwright image. Use `--port 8765` for a player on another port, or `--widths 390 980` to choose viewport widths in CSS pixels.

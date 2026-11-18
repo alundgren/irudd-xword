@@ -5,8 +5,10 @@ import { draft } from "./newspaper";
 import { metrics, validate, type Pack } from "./grid";
 import { serve } from "./player";
 
+import { dailyBrief, clueBank } from "./styles";
+
 const usage =
-  "bun run xword <generate|context|find|validate|serve|draft|inspect> [options]";
+  "bun run xword <brief|generate|context|find|validate|serve|draft|inspect> [options]";
 function main() {
   const {
     values: v,
@@ -15,6 +17,10 @@ function main() {
     args: Bun.argv.slice(2),
     allowPositionals: true,
     options: {
+      day: { type: "string" },
+      paper: { type: "string" },
+      voice: { type: "string" },
+      corner: { type: "string" },
       lang: { type: "string", default: "sv" },
       pack: { type: "string" },
       port: { type: "string", default: "8765" },
@@ -31,7 +37,7 @@ function main() {
   if (v.help || !action) {
     console.log(
       usage +
-        "\nDraft: draft large|train --words FILE --answer WORD --image FILE --output FILE --seed N\nInspect: inspect PACK\nGenerate: generate [--lang sv|en] [--pack FILE]\nServe: serve [--port PORT]",
+        "\nBrief: brief [--day YYYY-MM-DD] [--voice classic|fieldnotes|wordplay] [--paper newsprint|chalk|mechanical] [--corner left|right]\nDraft: draft large|train --words FILE --answer WORD --image FILE --output FILE --seed N [--day DATE] [--voice VOICE] [--paper PAPER] [--corner SIDE]\nInspect: inspect PACK\nGenerate: generate [--lang sv|en] [--pack FILE] [--day DATE] [--voice VOICE] [--paper PAPER]\nServe: serve [--port PORT]",
     );
     return;
   }
@@ -43,6 +49,32 @@ function main() {
     const report = metrics(JSON.parse(readFileSync(arg, "utf8")));
     console.log(JSON.stringify(report));
     if (report.missing_clues) process.exitCode = 1;
+    return;
+  }
+  const brief = () =>
+    dailyBrief(
+      v.day ?? new Date().toLocaleDateString("sv-SE"),
+      v.voice,
+      v.corner,
+      v.paper,
+    );
+  if (action === "brief") {
+    const plan = brief();
+    const library = new Collection(root);
+    try {
+      console.log(
+        JSON.stringify(
+          {
+            ...plan,
+            recent_editions: library.recentEditions(lang, plan.edition_day),
+          },
+          null,
+          2,
+        ),
+      );
+    } finally {
+      library.db.close();
+    }
     return;
   }
   const known = bank(root, lang);
@@ -80,8 +112,19 @@ function main() {
         vocabulary.delete(w.trim());
     const theme = v.answer.toUpperCase();
     vocabulary.set(theme, 0);
-    const { entries, rect } = draft(arg, theme, vocabulary, Number(v.seed));
+    const { edition_day, voice, paper, picture_corner } = brief();
+    const clues = clueBank(known, lang, voice);
+    const { entries, rect } = draft(
+      arg,
+      theme,
+      vocabulary,
+      Number(v.seed),
+      picture_corner,
+    );
     const pack: Pack = {
+      edition_day,
+      voice,
+      paper,
       layout: "illustrated-grid",
       generated_png: v.image,
       picture_answer: theme,
@@ -89,7 +132,7 @@ function main() {
       picture_rect: rect,
       entries,
       words: Object.fromEntries(
-        entries.filter((e) => e[0] !== theme).map(([w]) => [w, known[w] ?? ""]),
+        entries.filter((e) => e[0] !== theme).map(([w]) => [w, clues[w] ?? ""]),
       ),
     };
     writeFileSync(v.output, JSON.stringify(pack, null, 2) + "\n", {
@@ -102,7 +145,15 @@ function main() {
   const collection = new Collection(root);
   switch (action) {
     case "generate":
-      console.log("Edition", collection.publish(lang, v.pack), "ready");
+      console.log(
+        "Edition",
+        collection.publish(lang, v.pack, {
+          day: v.day,
+          voice: v.voice,
+          paper: v.paper,
+        }),
+        "ready",
+      );
       break;
     case "context":
       console.log(JSON.stringify(collection.history(lang)));

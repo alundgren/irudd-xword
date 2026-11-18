@@ -23,6 +23,8 @@ export function serve(collection: Collection, port: number, lang = "sv") {
           const asset = (
             {
               "/": "index.html",
+              "/fonts/Rutverk.otf": "fonts/Rutverk.otf",
+              "/fonts/Krysskrita.otf": "fonts/Krysskrita.otf",
               "/layout.js": "dist/layout.js",
               "/illustration.png": "illustration.png",
             } as Record<string, string>

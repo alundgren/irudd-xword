@@ -5,7 +5,20 @@
   "picture_answer": "FYR",
   "picture_clue": "Visar vägen i mörker",
   "extra_pictures": [
-    {"generated_png": "coastal-detail.png", "answer": "LIVBOJ", "clue": "Kastas till den nödställde"}
+    {
+      "generated_png": "coastal-detail.png",
+      "answer": "LIVBOJ",
+      "clue": "Kastas till den nödställde",
+      "art_by_paper": {
+        "chalk": "art/chalk-ring.png",
+        "mechanical": "art/mechanical-ring.png"
+      }
+    }
   ],
-  "words": {}
+  "words": {},
+  "art_by_paper": {
+    "chalk": "art/chalk-beacon.png",
+    "mechanical": "art/mechanical-beacon.png"
+  },
+  "editorial_note": "Coastal mini with two illustrated objects at a Swedish quay."
 }

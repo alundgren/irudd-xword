@@ -10,7 +10,11 @@ export function seeded(seed: number) {
   };
 }
 
-export function layout(large: boolean, random: () => number) {
+export function layout(
+  large: boolean,
+  random: () => number,
+  corner: "left" | "right" = "left",
+) {
   const widths = large ? [3, 4, 3, 3] : [3, 3],
     heights = large ? [3, 3, 3, 3, 2] : [2, 3, 2],
     reserve = large ? 2 : 1;
@@ -20,9 +24,10 @@ export function layout(large: boolean, random: () => number) {
     ys = offsets(heights),
     groups = new Map<string, Set<string>>(),
     board = new Set<string>();
+  const first = corner === "left" ? 0 : widths.length - reserve;
   for (let i = 0; i < xs.length; i++)
     for (let j = 0; j < ys.length; j++) {
-      if (i < reserve && j < reserve) continue;
+      if (i >= first && i < first + reserve && j < reserve) continue;
       const room = String([i, j]);
       groups.set(room, new Set([room]));
       for (let x = 1; x <= widths[i]; x++)
@@ -72,7 +77,8 @@ export function layout(large: boolean, random: () => number) {
       if (run.length >= 2) slots.push(run);
     }
   }
-  return { slots, rect: [0, 0, xs[reserve], ys[reserve]] as Rect };
+  const end = xs[first + reserve] ?? xs.at(-1)! + widths.at(-1)! + 1;
+  return { slots, rect: [xs[first], 0, end - xs[first], ys[reserve]] as Rect };
 }
 
 export function fill(
@@ -156,6 +162,7 @@ export function draft(
   theme: string,
   vocabulary: Map<string, number>,
   seed: number,
+  corner: "left" | "right" = "left",
 ) {
   if (
     !["large", "train"].includes(profile) ||
@@ -165,7 +172,7 @@ export function draft(
     throw Error("Invalid draft parameters");
   const random = seeded(seed);
   for (let attempt = 0; attempt < 120; attempt++) {
-    const { slots, rect } = layout(profile === "large", random),
+    const { slots, rect } = layout(profile === "large", random, corner),
       answer = fill(slots, theme, vocabulary, random);
     if (answer) {
       const entries: Entry[] = slots.map(([[x, y], [xx, yy]], i) => [
