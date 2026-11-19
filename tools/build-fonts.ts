@@ -63,7 +63,7 @@ function buildFont(chalk: boolean) {
     const base =
       character === "Ö" ? "O" : "ÅÄ".includes(character) ? "A" : character;
     const path = new opentype.Path();
-    const radius = chalk ? 36 : 39;
+    const radius = chalk ? 49 : 39;
     const unitX = chalk ? 85 : 74;
     const point = (x: number, y: number): Point => [
       58 + x * unitX + (chalk ? 3 * (9 - y) + 5 * Math.sin(y * 1.8 + x) : 0),
@@ -82,11 +82,40 @@ function buildFont(chalk: boolean) {
           return [x + r * Math.cos(angle), y + r * Math.sin(angle)];
         }),
       );
+    // A chalk edge catches on the board. Split the deposit into two uneven
+    // tracks, leaving short exposed streaks through the heavier downstrokes.
+    let grain = character.charCodeAt(0);
+    function jitter() {
+      grain = (Math.imul(grain, 1664525) + 1013904223) >>> 0;
+      return grain / 4294967296;
+    }
+    function chalkSegment(start: Point, end: Point, r: number) {
+      const vx = end[0] - start[0], vy = end[1] - start[1];
+      const length = Math.hypot(vx, vy);
+      if (!length) return;
+      const steps = Math.ceil(length / 20);
+      const edges: Point[][] = [[], [], [], []];
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const x = start[0] + vx * t, y = start[1] + vy * t;
+        const ridge = r * (.12 + .18 * Math.sin(i * .7));
+        const gap = i > 0 && i < steps && jitter() > .26 ? r * (.18 + .33 * jitter()) : 0;
+        const offsets = [r * (.67 + jitter() * .46), ridge + gap / 2,
+          ridge - gap / 2, -r * (.67 + jitter() * .46)];
+        offsets.forEach((offset, k) => edges[k].push([x - vy / length * offset, y + vx / length * offset]));
+      }
+      polygon([...edges[0], ...edges[1].reverse()]);
+      polygon([...edges[2], ...edges[3].reverse()]);
+    }
     function stroke(points: Point[], r = radius) {
-      for (const p of points) dot(p, r);
+      for (const p of points) dot(p, chalk ? r * .74 : r);
       for (let i = 1; i < points.length; i++) {
         const [x, y] = points[i - 1],
           [xx, yy] = points[i];
+        if (chalk) {
+          chalkSegment(points[i - 1], points[i], r);
+          continue;
+        }
         const length = Math.hypot(xx - x, yy - y);
         const dx = ((y - yy) / length) * r,
           dy = ((xx - x) / length) * r;

@@ -198,6 +198,37 @@
       margin-inline: 0;
     }
 
+    html:has([data-print="newsprint"]) {
+      position: relative;
+      min-height: 100%;
+      background: #e6dbbf;
+    }
+    body:has([data-print="newsprint"]) {
+      background: transparent;
+      color: #302c25;
+    }
+    /* One continuous grain across margins, rules and letter squares. */
+    html:has([data-print="newsprint"])::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      mix-blend-mode: multiply;
+      opacity: .39;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.63 .44' numOctaves='3' stitchTiles='stitch' result='grain'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.032 .19' numOctaves='2' stitchTiles='stitch'/%3E%3CfeComposite in2='grain' operator='arithmetic' k2='.38' k3='.62'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2' intercept='-.19'/%3E%3CfeFuncG type='linear' slope='2' intercept='-.19'/%3E%3CfeFuncB type='linear' slope='2' intercept='-.19'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23p)' d='M0 0h240v240H0z'/%3E%3C/svg%3E");
+    }
+    .page[data-print="newsprint"] #grid { background: #aa9e83; border-color: #7c725e; }
+    .page[data-print="newsprint"] .cell { background: #eee4c9; color: #302c25; }
+    .page[data-print="newsprint"] .cell.active { background: #f4d179; }
+    .page[data-print="newsprint"] .box { background: #d8cbb0; }
+    .page[data-print="newsprint"] .clue { color: #312d25; }
+    .page[data-print="newsprint"] .clue + .clue { border-color: #9d9178; }
+    body:has([data-print="newsprint"]) :is(select, textarea, .action) {
+      background-color: #ece2ca;
+      color: #302c25;
+    }
+
     body:has([data-print="chalk"]) {
       background: #233735;
       color: #fbf1da;
