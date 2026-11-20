@@ -1,7 +1,6 @@
 import { join } from "node:path";
 import { Collection } from "./collection";
-export function serve(collection: Collection, port: number, lang = "sv") {
-  if (!collection.history(lang).length) collection.publish(lang);
+export function serve(collection: Collection, port: number) {
   return Bun.serve({
     hostname: "127.0.0.1",
     port,
@@ -49,10 +48,7 @@ export function serve(collection: Collection, port: number, lang = "sv") {
         )
           return fail(400);
         const data = await req.json();
-        if (route === "/generate") {
-          if (!["sv", "en"].includes(data.lang)) return fail(400);
-          return Response.json({ id: collection.publish(data.lang) });
-        }
+        if (!["/mark", "/check", "/feedback"].includes(route)) return fail(404);
         if (!Number.isSafeInteger(data.id)) return fail(400);
         const row = collection.row(data.id);
         if (!row) return fail(404);

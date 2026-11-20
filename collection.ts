@@ -20,7 +20,6 @@ import {
   type Words,
   type Pack,
 } from "./grid";
-import { generate } from "./generate";
 
 import { dailyBrief, clueBank, type ClueVoice, type Paper } from "./styles";
 
@@ -228,17 +227,15 @@ export class Collection {
   }
   publish(
     lang: string,
-    file?: string,
+    file: string,
     options: { day?: string; voice?: string; paper?: string } = {},
   ) {
-    const builtin = !file;
+    if (!file) throw Error("An authored --pack FILE is required");
     if (lang !== "sv" && lang !== "en") throw Error("Choose sv or en");
-    if (!file && lang === "sv") file = join(this.root, "coast.sv.json");
-    const previous = this.history(lang);
     const layouts = ["picture-first", "grid-first", "side-by-side"];
-    const pack: Partial<Pack> = file
-      ? JSON.parse(readFileSync(file, "utf8"))
-      : {};
+    const pack: Pack = JSON.parse(readFileSync(file, "utf8"));
+    if (!Array.isArray(pack.entries) || !pack.entries.length)
+      throw Error("An authored pack must include its grid entries");
     const day =
       options.day ?? pack.edition_day ?? new Date().toLocaleDateString("sv-SE");
     const { voice, paper } = dailyBrief(
@@ -247,69 +244,45 @@ export class Collection {
       undefined,
       options.paper ?? pack.paper,
     );
-    const layout = pack.layout ?? layouts[previous.length % 3];
+    const layout =
+      pack.layout ?? layouts[this.history(lang).length % layouts.length];
     if (![...layouts, "illustrated-grid"].includes(layout))
       throw Error("Unknown layout");
-    let words = clueBank(bank(this.root, lang), lang, voice),
-      picture = "illustration.png";
+    const anchor = pack.picture_answer.toUpperCase();
+    const picture = this.storePicture(
+      resolve(dirname(file), pack.art_by_paper?.[paper] ?? pack.generated_png),
+    );
+    const words = {
+      ...clueBank(bank(this.root, lang), lang, voice),
+      ...pack.words,
+      [anchor]: pack.picture_clue,
+    };
     const panels = new Map<string, string>();
-    const anchor = file
-      ? pack.picture_answer!.toUpperCase()
-      : Object.keys(words)[0];
-    if (file) {
-      picture = this.storePicture(
-        resolve(
-          dirname(file),
-          pack.art_by_paper?.[paper] ?? pack.generated_png!,
-        ),
-      );
-      delete words[Object.keys(words)[0]];
-      words = {
-        [anchor]: pack.picture_clue!,
-        ...pack.words,
-        ...Object.fromEntries(
-          Object.entries(words).filter(
-            ([w]) => w !== anchor && !Object.hasOwn(pack.words ?? {}, w),
-          ),
-        ),
-      };
-      if (layout === "illustrated-grid") {
-        panels.set(anchor, picture);
-        for (const extra of pack.extra_pictures ?? []) {
-          const w = extra.answer.toUpperCase();
-          if (panels.has(w)) throw Error("Duplicate picture answer");
-          panels.set(
-            w,
-            this.storePicture(
-              resolve(
-                dirname(file),
-                extra.art_by_paper?.[paper] ?? extra.generated_png,
-              ),
+    if (layout === "illustrated-grid") {
+      panels.set(anchor, picture);
+      for (const extra of pack.extra_pictures ?? []) {
+        const w = extra.answer.toUpperCase();
+        if (panels.has(w)) throw Error("Duplicate picture answer");
+        panels.set(
+          w,
+          this.storePicture(
+            resolve(
+              dirname(file),
+              extra.art_by_paper?.[paper] ?? extra.generated_png,
             ),
-          );
-          words[w] = extra.clue;
-        }
-      } else if (pack.extra_pictures?.length)
-        throw Error("Additional pictures require illustrated-grid");
-      for (const [w, c] of Object.entries(words))
-        if (!/^[A-ZÅÄÖ]{2,30}$/.test(w) || typeof c !== "string" || !c.trim())
-          throw Error("Invalid answer or blank clue");
-      if (builtin) words = clueBank(words, lang, voice);
-      [...panels.keys()].forEach((w, i) => {
-        words[w] = `Bild ${i + 1} · ${words[w]}`;
-      });
-    }
-    const entries =
-      pack.entries ??
-      generate(
-        words,
-        anchor,
-        [...panels.keys()],
-        pack.fill === "dense",
-        (pack.fill === "dense" ? previous.slice(-5) : previous).flatMap(
-          (p) => p.entries,
-        ),
-      );
+          ),
+        );
+        words[w] = extra.clue;
+      }
+    } else if (pack.extra_pictures?.length)
+      throw Error("Additional pictures require illustrated-grid");
+    for (const [w, c] of Object.entries(words))
+      if (!/^[A-ZÅÄÖ]{2,30}$/.test(w) || typeof c !== "string" || !c.trim())
+        throw Error("Invalid answer or blank clue");
+    [...panels.keys()].forEach((w, i) => {
+      words[w] = `Bild ${i + 1} · ${words[w]}`;
+    });
+    const entries = pack.entries;
     validate(entries, words);
     if (!entries.some((e) => e[0] === anchor))
       throw Error("Picture answer missing");

@@ -1,5 +1,11 @@
 import { directions, validate, type Cell, type Entry, type Rect } from "./grid";
-import { shuffle } from "./generate";
+function shuffle<T>(items: T[], random = Math.random) {
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [items[i], items[j]] = [items[j], items[i]];
+  }
+  return items;
+}
 
 export function seeded(seed: number) {
   return () => {

@@ -8,8 +8,6 @@ Install Bun. From the repository root run:
 
 ```sh
 bun install --frozen-lockfile
-bun run xword generate --lang en
-bun run xword generate --lang sv
 bun run desktop
 ```
 
@@ -19,7 +17,7 @@ For local browser play, run `bun run build:view` and `bun run xword serve --port
 
 [Generating editions and finding words](AUTHORING.md) · [Project conventions](AGENTS.md) · [MIT license](LICENSE)
 
-Use **Skapa nytt minikryss** to generate a mini in the selected language. For newspaper drafts and private packs, use `bun run xword --help`. The installed macOS bundle also supports the CLI with its included runtime:
+Publish an authored edition with `bun run xword generate --pack PATH`. For newspaper drafts and private packs, use `bun run xword --help`. The installed macOS bundle also supports the CLI with its included runtime:
 
 ```sh
 app="$HOME/Applications/Morgonkryss.app/Contents"

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { Database } from "bun:sqlite";
-import { mkdtempSync, rmSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Collection } from "./collection";
@@ -9,7 +9,24 @@ import { serve } from "./player";
 import { cells, checkRect, validate, type Entry } from "./grid";
 import { seeded, fill, layout } from "./newspaper";
 
-test("legacy storage, dense and English generation, public projection and persistent progress", async () => {
+function testPack() {
+  const png = join(import.meta.dir, "illustration.png");
+  return {
+    layout: "illustrated-grid",
+    picture_answer: "IS",
+    picture_clue: "Fruset vatten",
+    generated_png: png,
+    extra_pictures: [{ answer: "TE", clue: "Varm dryck", generated_png: png }],
+    words: { IT: "Datateknik", SE: "Titta" },
+    entries: [
+      ["IS", 4, 4, 1, 0],
+      ["TE", 4, 5, 1, 0],
+      ["IT", 4, 4, 0, 1],
+      ["SE", 5, 4, 0, 1],
+    ],
+  };
+}
+test("legacy storage, authored editions, public projection and persistent progress", async () => {
   const directory = mkdtempSync(join(tmpdir(), "xword-test-"));
   const old = new Database(join(directory, "editions.sqlite"), {
     create: true,
@@ -37,7 +54,19 @@ test("legacy storage, dense and English generation, public projection and persis
       ).json();
     expect(library.row(1)!.paper).toBe("newsprint");
     expect(library.row(1)!.voice).toBe("classic");
-    const [[id]] = await get("editions");
+    expect(await get("editions")).toHaveLength(1);
+    expect(
+      (
+        await fetch(new URL("generate", base), {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: '{"lang":"sv"}',
+        })
+      ).status,
+    ).toBe(404);
+    const pack = join(directory, "custom.json");
+    writeFileSync(pack, JSON.stringify(testPack()));
+    const id = library.publish("sv", pack);
     const puzzle = await get("p/" + id);
     expect(puzzle.panels.length).toBe(2);
     expect(Object.keys(puzzle.entries[0]).sort()).toEqual([
@@ -100,8 +129,6 @@ test("legacy storage, dense and English generation, public projection and persis
       wrong: [cell],
       complete: false,
     });
-    const generated = await post("generate", { lang: "en" });
-    expect((await get("p/" + generated.id)).entries.length).toBeGreaterThan(1);
     library.db.close();
     library = new Collection(import.meta.dir, directory);
     expect(library.publicPuzzle(library.row(id)!).guesses[cell]).toBe(value);
@@ -220,30 +247,15 @@ test("saved illustrations and authored clues survive publication and changing da
   const library = new Collection(import.meta.dir, directory);
   try {
     const options = { day: "2026-11-20", paper: "chalk", voice: "wordplay" };
-    const demo = library.row(library.publish("sv", undefined, options))!;
-    const first = library.publicPuzzle(demo);
-    expect(
-      first.entries.some(
-        (e) => e.clue.startsWith("Bild 1 · ") && e.clue.endsWith("?"),
-      ),
-    ).toBe(true);
-    const custom = JSON.parse(
-      readFileSync(join(import.meta.dir, "coast.sv.json"), "utf8"),
-    );
-    custom.entries = JSON.parse(demo.entries);
-    custom.generated_png = join(import.meta.dir, custom.generated_png);
-    delete custom.art_by_paper;
-    custom.extra_pictures[0].generated_png = join(
-      import.meta.dir,
-      custom.extra_pictures[0].generated_png,
-    );
-    delete custom.extra_pictures[0].art_by_paper;
+    const custom = testPack();
     custom.picture_clue = "Min bildnyckel";
-    custom.editorial_note = "En närbild vid kajen";
+    const note = "En närbild vid kajen";
     const file = join(directory, "pack.json");
-    writeFileSync(file, JSON.stringify(custom));
+    writeFileSync(file, JSON.stringify({ ...custom, entries: undefined }));
+    expect(() => library.publish("sv", file, options)).toThrow("grid entries");
+    writeFileSync(file, JSON.stringify({ ...custom, editorial_note: note }));
     const saved = library.row(library.publish("sv", file, options))!;
-    expect(saved.picture).not.toBe(demo.picture);
+    expect(library.image(saved)?.size).toBeGreaterThan(0);
     const visible = library.publicPuzzle(saved);
     expect(
       visible.entries.some((e) => e.clue === "Bild 1 · Min bildnyckel"),
@@ -251,7 +263,7 @@ test("saved illustrations and authored clues survive publication and changing da
     expect(visible.paper).toBe("chalk");
     expect(visible).not.toHaveProperty("editorial_note");
     expect(library.recentEditions("sv", options.day)[0]).toMatchObject({
-      editorial_note: custom.editorial_note,
+      editorial_note: note,
       voice: "wordplay",
     });
     expect(library.recentEditions("sv", "2026-11-19")).toHaveLength(0);

@@ -37,7 +37,7 @@ function main() {
   if (v.help || !action) {
     console.log(
       usage +
-        "\nBrief: brief [--day YYYY-MM-DD] [--voice classic|fieldnotes|wordplay] [--paper newsprint|chalk|mechanical] [--corner left|right]\nDraft: draft large|train --words FILE --answer WORD --image FILE --output FILE --seed N [--day DATE] [--voice VOICE] [--paper PAPER] [--corner SIDE]\nInspect: inspect PACK\nGenerate: generate [--lang sv|en] [--pack FILE] [--day DATE] [--voice VOICE] [--paper PAPER]\nServe: serve [--port PORT]",
+        "\nBrief: brief [--day YYYY-MM-DD] [--voice classic|fieldnotes|wordplay] [--paper newsprint|chalk|mechanical] [--corner left|right]\nDraft: draft large|train --words FILE --answer WORD --image FILE --output FILE --seed N [--day DATE] [--voice VOICE] [--paper PAPER] [--corner SIDE]\nInspect: inspect PACK\nGenerate: generate [--lang sv|en] --pack FILE [--day DATE] [--voice VOICE] [--paper PAPER]\nServe: serve [--port PORT]",
     );
     return;
   }
@@ -145,6 +145,7 @@ function main() {
   const collection = new Collection(root);
   switch (action) {
     case "generate":
+      if (!v.pack) throw Error("An authored --pack FILE is required");
       console.log(
         "Edition",
         collection.publish(lang, v.pack, {
@@ -163,7 +164,7 @@ function main() {
       console.log("All stored grids passed");
       break;
     case "serve":
-      console.log(serve(collection, Number(v.port), lang).port);
+      console.log(serve(collection, Number(v.port)).port);
       return;
     default:
       throw Error(usage);

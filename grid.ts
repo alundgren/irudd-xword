@@ -11,9 +11,8 @@ export type Pack = Illustration & {
   picture_answer: string;
   picture_clue: string;
   layout?: string;
-  fill?: string;
   words?: Words;
-  entries?: Entry[];
+  entries: Entry[];
   extra_pictures?: (Illustration & { answer: string; clue: string })[];
   picture_rect?: Rect;
   edition_day?: string;
@@ -98,10 +97,6 @@ export function validate(entries: Entry[], words?: Words) {
     paths.splice(i, 1)[0].forEach((k) => reached.add(k));
   }
   return grid;
-}
-export function normalize(entries: Entry[]): Entry[] {
-  const { left, top } = inspect(entries);
-  return entries.map(([w, x, y, dx, dy]) => [w, x - left, y - top, dx, dy]);
 }
 export function rectangle([x, y, w, h]: Rect) {
   return Array.from({ length: w * h }, (_, i) =>

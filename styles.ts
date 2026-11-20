@@ -69,7 +69,7 @@ export function dailyBrief(
   };
 }
 
-// Original Swedish keys for the built-in mini and suggestions for private drafts.
+// Original Swedish keys for private drafts.
 const alternatives: Record<Exclude<ClueVoice, "classic">, Words> = {
   fieldnotes: {
     FYR: "Blinkar över sundet",
