@@ -317,7 +317,6 @@ function Library() {
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("Alla");
   const [creating, setCreating] = useState(false);
-  const [lang, setLang] = useState("sv");
   useEffect(() => {
     function refresh() {
       request("/library")
@@ -338,31 +337,21 @@ function Library() {
     <div className="shelf">
       <header>
         <h1>Morgonkryss</h1>
-        <div className="new-mini">
-          <select
-            aria-label="Språk för nytt minikryss"
-            value={lang}
-            onChange={(e) => setLang(e.target.value)}
-          >
-            <option value="sv">Svenska</option>
-            <option value="en">Engelska</option>
-          </select>
-          <button
-            disabled={creating}
-            onClick={async () => {
-              setCreating(true);
-              try {
-                const result = await request("/generate", { lang });
-                location.assign("?edition=" + result.id);
-              } catch (e) {
-                setError(String(e));
-                setCreating(false);
-              }
-            }}
-          >
-            + Nytt minikryss
-          </button>
-        </div>
+        <button className="new-mini"
+          disabled={creating}
+          onClick={async () => {
+            setCreating(true);
+            try {
+              const result = await request("/generate", { lang: "sv" });
+              location.assign("?edition=" + result.id);
+            } catch (e) {
+              setError(String(e));
+              setCreating(false);
+            }
+          }}
+        >
+          + Nytt minikryss
+        </button>
       </header>
       <nav aria-label="Filtrera kryss">
         {["Alla", "Orört", "Påbörjat", "Löst"].map((label) => (
