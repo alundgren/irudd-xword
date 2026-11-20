@@ -198,24 +198,35 @@
       margin-inline: 0;
     }
 
-    html:has([data-print="newsprint"]) {
+    html:has(.page[data-print]) {
       position: relative;
       min-height: 100%;
-      background: #e6dbbf;
+      background-color: var(--sheet, #e6dbbf);
+    }
+    html:has([data-print="chalk"]) {
+      --sheet: #293832;
+      --grain-blend: soft-light;
+      --grain-opacity: .68;
+      --grain-size: 183px;
+    }
+    html:has([data-print="mechanical"]) {
+      --sheet: #ded8bf;
+      --grain-size: 204px;
     }
     body:has([data-print="newsprint"]) {
       background: transparent;
       color: #302c25;
     }
     /* One continuous grain across margins, rules and letter squares. */
-    html:has([data-print="newsprint"])::after {
+    html:has(.page[data-print])::after {
       content: "";
       position: absolute;
       inset: 0;
       pointer-events: none;
       z-index: 2;
-      mix-blend-mode: multiply;
-      opacity: .39;
+      mix-blend-mode: var(--grain-blend, multiply);
+      opacity: var(--grain-opacity, .39);
+      background-size: var(--grain-size, 240px);
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.63 .44' numOctaves='3' stitchTiles='stitch' result='grain'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.032 .19' numOctaves='2' stitchTiles='stitch'/%3E%3CfeComposite in2='grain' operator='arithmetic' k2='.38' k3='.62'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2' intercept='-.19'/%3E%3CfeFuncG type='linear' slope='2' intercept='-.19'/%3E%3CfeFuncB type='linear' slope='2' intercept='-.19'/%3E%3CfeFuncA type='linear' slope='0' intercept='1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23p)' d='M0 0h240v240H0z'/%3E%3C/svg%3E");
     }
     .page[data-print="newsprint"] #grid { background: #aa9e83; border-color: #7c725e; }
@@ -230,27 +241,34 @@
     }
 
     body:has([data-print="chalk"]) {
-      background: #233735;
+      color-scheme: dark;
+      background: transparent;
       color: #fbf1da;
       --lettering: Krysskrita, sans-serif;
-      --key-fill: #304643;
+      --key-fill: #34443b;
       --key-ink: #fff8df;
-      --box-fill: #435957;
+      --box-fill: #47564a;
       --box-ink: #fff9e8;
-      --grid-line: #a7b5a9;
-      --selected: #f4dea0;
+      --grid-line: #7c8979;
+      --selected: #e4c87f;
     }
     body:has([data-print="mechanical"]) {
-      background: #f0f3ee;
+      background: transparent;
       color: #19394f;
       --lettering: Rutverk, monospace;
-      --key-fill: #fdfdfa;
+      --key-fill: #ece5cd;
       --key-ink: #173e54;
-      --box-fill: #dae7e9;
+      --box-fill: #cdd1bd;
       --box-ink: #12374c;
-      --grid-line: #819ba5;
-      --selected: #f9dbab;
+      --grid-line: #8b988d;
+      --selected: #ebca80;
     }
+    body:has([data-print="chalk"], [data-print="mechanical"]) :is(select, textarea, .action) {
+      background-color: var(--key-fill);
+      color: var(--key-ink);
+      border: 1px solid var(--grid-line);
+    }
+    .page[data-print="mechanical"] .clue + .clue { border-color: var(--grid-line); }
     body:has([data-print="chalk"]) header {
       border-bottom: 2px dashed #b7c8ba;
     }
@@ -307,7 +325,7 @@
       background-color: #f7e5bf;
     }
     .page[data-print="chalk"] .panel figcaption {
-      background: #304643;
+      background: #34443b;
       border: 1px solid #f4dea0;
       font-family: Krysskrita, sans-serif;
     }
