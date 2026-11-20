@@ -65,8 +65,33 @@ test("legacy storage, dense and English generation, public projection and persis
         (await fetch(new URL("panel/" + id + "/" + slot, base))).status,
       ).toBe(200);
     }
+    const summary = async () =>
+      (await get("library")).find((item: { id: number }) => item.id === id);
+    expect(await summary()).toMatchObject({
+      filled: 0,
+      solved: false,
+      total: grid.letters.size,
+    });
     const [cell, value] = grid.letters.entries().next().value!;
     expect(await post("mark", { id, cell, value })).toEqual({ saved: true });
+    expect(await summary()).toMatchObject({ filled: 1, solved: false });
+    for (const [key, letter] of grid.letters)
+      await post("mark", { id, cell: key, value: letter });
+    expect(await summary()).toMatchObject({
+      filled: grid.letters.size,
+      solved: true,
+    });
+    await post("mark", { id, cell, value: value === "Z" ? "A" : "Z" });
+    expect(await summary()).toMatchObject({
+      filled: grid.letters.size,
+      solved: false,
+    });
+    await post("mark", { id, cell, value: "" });
+    expect(await summary()).toMatchObject({
+      filled: grid.letters.size - 1,
+      solved: false,
+    });
+    await post("mark", { id, cell, value });
     await post("feedback", { id, text: "Fler ordvitsar" });
     expect(
       await post("check", { id, guesses: Object.fromEntries(grid.letters) }),

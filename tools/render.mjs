@@ -74,7 +74,7 @@ try {
         contentType: file[1],
       });
     });
-    await page.goto("http://puzzle.local/");
+    await page.goto("http://puzzle.local/?edition=" + edition);
     await page.waitForFunction(
       (n) => document.querySelectorAll(".clue").length === n,
       puzzle.entries.length,

@@ -14,12 +14,31 @@ type Entry = { cells: Cell[]; direction: Cell; clue: string };
 type Edition = {
   entries: Entry[];
   layout: string;
+  title: string;
+  lang: string;
   paper: string;
   panels: { slot: number; rect: [number, number, number, number] }[];
   guesses: Record<string, string>;
   feedback: string;
 };
-type Row = [number, string, string, string?];
+type LibraryEntry = {
+  id: number;
+  lang: string;
+  day: string;
+  title: string;
+  paper: string;
+  total: number;
+  filled: number;
+  solved: boolean;
+  count: number;
+  squares: string;
+  bounds: number[];
+};
+function editionTitle(item: { title: string; lang: string }, id: number) {
+  return (
+    item.title || (item.lang === "en" ? "Engelskt kryss " : "Minikryss ") + id
+  );
+}
 async function request(route: string, data?: object) {
   const response = await fetch(
     route,
@@ -166,7 +185,8 @@ function Crossword() {
     </div>
   );
 }
-function Puzzle({ id, preview }: { id: number; preview: string }) {
+function Puzzle({ id }: { id: number }) {
+  const [preview, setPreview] = useState("");
   const [edition, setEdition] = useState<Edition>();
   const [guesses, setGuesses] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState("");
@@ -189,7 +209,12 @@ function Puzzle({ id, preview }: { id: number; preview: string }) {
       live = false;
     };
   }, [id]);
-  if (!edition) return <p>{status}</p>;
+  if (!edition)
+    return (
+      <p>
+        <a href="/">← Alla kryss</a> {status}
+      </p>
+    );
   function mark(cell: string, value: string) {
     setGuesses((g) => ({ ...g, [cell]: value }));
     setWrong((w) => w.filter((c) => c !== cell));
@@ -204,6 +229,36 @@ function Puzzle({ id, preview }: { id: number; preview: string }) {
     <Player.Provider
       value={{ id, edition, guesses, selected, setSelected, wrong, mark }}
     >
+      <header className="solver-tools">
+        <a
+          href="/"
+          onClick={async (event) => {
+            if (
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.altKey
+            )
+              return;
+            event.preventDefault();
+            await writes.current;
+            location.assign("/");
+          }}
+        >
+          ← Alla kryss
+        </a>
+        <h1>{editionTitle(edition, id)}</h1>
+        <select
+          aria-label="Tryckstil"
+          value={preview}
+          onChange={(e) => setPreview(e.target.value)}
+        >
+          <option value="">Utgåvans stil</option>
+          <option value="newsprint">Tidningspapper</option>
+          <option value="chalk">Krittavla</option>
+          <option value="mechanical">Verkstadsritning</option>
+        </select>
+      </header>
       <div className={"page " + layout} data-print={preview || edition.paper}>
         {layout !== "grid-first" && layout !== "illustrated-grid" && picture}
         <Crossword />
@@ -257,75 +312,119 @@ function Puzzle({ id, preview }: { id: number; preview: string }) {
     </Player.Provider>
   );
 }
-function App() {
-  const [preview, setPreview] = useState("");
-  const [rows, setRows] = useState<Row[]>([]),
-    [id, setId] = useState(0),
-    [error, setError] = useState("");
-  async function generateEdition() {
-    try {
-      setError("");
-      const lang = rows.find((row) => row[0] === id)?.[1] || "sv";
-      const result = await request("/generate", { lang });
-      setRows(await request("/editions"));
-      setPreview("");
-      setId(result.id);
-    } catch (e) {
-      setError(String(e));
-    }
-  }
+function Library() {
+  const [items, setItems] = useState<LibraryEntry[]>([]);
+  const [error, setError] = useState("");
+  const [filter, setFilter] = useState("Alla");
+  const [creating, setCreating] = useState(false);
+  const [lang, setLang] = useState("sv");
   useEffect(() => {
-    request("/editions")
-      .then((list) => {
-        setRows(list);
-        const requested = Number(
-          new URLSearchParams(location.search).get("edition"),
-        );
-        setId(
-          list.some((row: Row) => row[0] === requested)
-            ? requested
-            : list[0]?.[0] || 0,
-        );
-      })
-      .catch((e) => setError(e.message));
+    function refresh() {
+      request("/library")
+        .then(setItems)
+        .catch((e) => setError(e.message));
+    }
+    refresh();
+    window.addEventListener("pageshow", refresh);
+    return () => window.removeEventListener("pageshow", refresh);
   }, []);
+  const state = (item: LibraryEntry) =>
+    item.solved ? "Löst" : item.filled ? "Påbörjat" : "Orört";
+  const visible = items.filter(
+    (item) => filter === "Alla" || state(item) === filter,
+  );
+  const dates = [...new Set(visible.map((item) => item.day))];
   return (
-    <>
+    <div className="shelf">
       <header>
         <h1>Morgonkryss</h1>
-        <div className="edition-tools">
+        <div className="new-mini">
           <select
-            aria-label="Tryckstil"
-            value={preview}
-            onChange={(event) => setPreview(event.target.value)}
+            aria-label="Språk för nytt minikryss"
+            value={lang}
+            onChange={(e) => setLang(e.target.value)}
           >
-            <option value="">Utgåvans stil</option>
-            <option value="newsprint">Tidningspapper</option>
-            <option value="chalk">Krittavla</option>
-            <option value="mechanical">Verkstadsritning</option>
+            <option value="sv">Svenska</option>
+            <option value="en">Engelska</option>
           </select>
-          <select
-            aria-label="Utgåva"
-            value={id}
-            onChange={(e) => {
-              setPreview("");
-              setId(Number(e.target.value));
+          <button
+            disabled={creating}
+            onClick={async () => {
+              setCreating(true);
+              try {
+                const result = await request("/generate", { lang });
+                location.assign("?edition=" + result.id);
+              } catch (e) {
+                setError(String(e));
+                setCreating(false);
+              }
             }}
           >
-            {rows.map(([n, lang, date, title]) => (
-              <option key={n} value={n}>
-                {date} · {title || lang.toUpperCase() + " · " + n}
-              </option>
-            ))}
-          </select>
+            + Nytt minikryss
+          </button>
         </div>
       </header>
-      {error}
-      {id > 0 && <Puzzle key={id} id={id} preview={preview} />}
-      <Button className="action" onClick={generateEdition}>
-        Skapa nytt minikryss
-      </Button>
-    </>
+      <nav aria-label="Filtrera kryss">
+        {["Alla", "Orört", "Påbörjat", "Löst"].map((label) => (
+          <button
+            key={label}
+            aria-pressed={filter === label}
+            onClick={() => setFilter(label)}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+      {error && <p role="alert">{error}</p>}
+      {dates.map((day) => (
+        <section key={day}>
+          <h2>
+            {new Intl.DateTimeFormat("sv-SE", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            }).format(new Date(day + "T12:00:00"))}
+          </h2>
+          <div className="cards">
+            {visible
+              .filter((item) => item.day === day)
+              .map((item) => (
+                <a
+                  className="edition-card"
+                  key={item.id}
+                  href={"?edition=" + item.id}
+                >
+                  <div className="cover" data-paper={item.paper}>
+                    <img src={"/image/" + item.id} loading="lazy" alt="" />
+                    <svg aria-hidden="true" viewBox={item.bounds.join(" ")}>
+                      <path d={item.squares} />
+                    </svg>
+                  </div>
+                  <div className="card-copy">
+                    <small>{item.count} ledtrådar</small>
+                    <h3>{editionTitle(item, item.id)}</h3>
+                    <span className="progress-label">
+                      <b aria-hidden="true">
+                        {item.solved ? "✓" : item.filled ? "◐" : "○"}
+                      </b>{" "}
+                      {state(item)}
+                      {item.filled > 0 &&
+                        !item.solved &&
+                        " · " + item.filled + "/" + item.total + " rutor"}
+                    </span>
+                  </div>
+                </a>
+              ))}
+          </div>
+        </section>
+      ))}
+      {!dates.length && !error && <p>Inga kryss i urvalet.</p>}
+    </div>
   );
+}
+function App() {
+  const id = Number(new URLSearchParams(location.search).get("edition"));
+  return Number.isSafeInteger(id) && id > 0 ? <Puzzle id={id} /> : <Library />;
 }
 createRoot(document.getElementById("app")!).render(<App />);

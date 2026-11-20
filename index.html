@@ -198,7 +198,7 @@
       margin-inline: 0;
     }
 
-    html:has(.page[data-print]) {
+    html:has(.page[data-print], .shelf) {
       position: relative;
       min-height: 100%;
       background-color: var(--sheet, #e6dbbf);
@@ -213,12 +213,12 @@
       --sheet: #ded8bf;
       --grain-size: 204px;
     }
-    body:has([data-print="newsprint"]) {
+    body:has([data-print="newsprint"], .shelf) {
       background: transparent;
       color: #302c25;
     }
     /* One continuous grain across margins, rules and letter squares. */
-    html:has(.page[data-print])::after {
+    html:has(.page[data-print], .shelf)::after {
       content: "";
       position: absolute;
       inset: 0;
@@ -337,6 +337,52 @@
     .page[data-print="mechanical"] #grid {
       outline: 1px solid #426275;
       outline-offset: 2px;
+    }
+
+    body:has(.shelf) { max-width: 1120px; }
+    .shelf header { align-items: baseline; flex-wrap: wrap; }
+    .new-mini { display: flex; gap: 6px; }
+    .shelf button, .shelf select {
+      background: #ede3ca; color: #34372b; border: 1px solid #948a70;
+      border-radius: 3px; padding: 6px 10px; cursor: pointer;
+    }
+    .new-mini button { background: #35483e; color: #fff5dd; }
+    .shelf nav { display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0 26px; }
+    .shelf nav button { border-radius: 20px; font-size: 14px; }
+    .shelf nav [aria-pressed="true"] { background: #36473b; border-color: #36473b; color: #fff7df; }
+    .shelf section { margin: 0 0 32px; }
+    .shelf h2 { display: flex; align-items: center; gap: 12px; margin: 0 0 13px; font: italic 19px Georgia,serif; }
+    .shelf h2::after { content: ""; flex: 1; border-top: 1px solid #a69b80; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(215px,100%),1fr)); gap: 16px; }
+    .edition-card { display: block; text-decoration: none; color: inherit; background: #f0e6cd;
+      border: 1px solid #aa9d80; box-shadow: 0 2px 2px #59431e18; }
+    .edition-card:hover, .edition-card:focus-visible { outline: 2px solid #506351; outline-offset: 2px; }
+    .cover { display: grid; grid-template-columns: 62% 38%; height: 132px; overflow: hidden;
+      border-bottom: 1px solid #aa9d80; background: #c5b89b; color: #f8efd7; }
+    .cover[data-paper="chalk"] { background: #425449; color: #adb7a2; }
+    .cover[data-paper="mechanical"] { background: #94a296; color: #efe7ca; }
+    .cover img { width: 100%; height: 100%; min-height: 0; margin: 0; object-fit: cover; }
+    .cover svg { width: 100%; height: 100%; padding: 8px; fill: currentColor; }
+    .card-copy { padding: 12px 14px 15px; }
+    .card-copy small { color: #655f4c; }
+    .card-copy h3 { margin: 4px 0 12px; font: bold 21px/1.16 Georgia,serif; }
+    .progress-label { font-size: 14px; }
+    .progress-label b { color: #365340; }
+    body:has(.solver-tools) { max-width: 1320px; margin-block: 8px; }
+    .solver-tools { gap: 10px; flex-wrap: nowrap; padding: 5px 0 7px; }
+    .solver-tools a { white-space: nowrap; color: inherit; text-underline-offset: 3px; }
+    body:has(.solver-tools) .solver-tools h1 { flex: 1; font: bold clamp(16px,2.6vw,28px)/1.15 Georgia,serif;
+      letter-spacing: 0; text-transform: none; transform: none; }
+    .solver-tools select { width: auto; max-width: 135px; font-size: 13px; }
+    .illustrated-grid #grid { margin-inline: auto; }
+    @media(max-width: 560px) {
+      body:has(.solver-tools) { padding-inline: 6px; }
+      .solver-tools { gap: 6px; font-size: 13px; }
+      .solver-tools select { max-width: 108px; padding: 4px; }
+      .cards { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+      .cover { height: 105px; }
+      .card-copy { padding: 9px; }
+      .card-copy h3 { font-size: 17px; }
     }
   </style>
   <main id="app"></main>

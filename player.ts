@@ -33,6 +33,7 @@ export function serve(collection: Collection, port: number, lang = "sv") {
             return new Response(Bun.file(join(collection.root, asset)), {
               headers: { "Cache-Control": "no-store" },
             });
+          if (route === "/library") return Response.json(collection.library());
           if (route === "/editions") return Response.json(collection.list());
           const m = /^\/(p|image|panel)\/(\d+)(?:\/(\d+))?$/.exec(route);
           if (!m || (m[1] === "panel") !== Boolean(m[3])) return fail(404);

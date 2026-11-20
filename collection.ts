@@ -90,6 +90,47 @@ export class Collection {
       .query("SELECT id,lang,day,title FROM editions ORDER BY day DESC,id DESC")
       .values();
   }
+  library() {
+    const rows = this.db
+      .query(
+        "SELECT id,lang,day,title,entries,paper FROM editions ORDER BY day DESC,id DESC",
+      )
+      .all() as EditionRow[];
+    const marks = this.db.query(
+      "SELECT cell,guess FROM marks WHERE edition=? AND guess<>''",
+    );
+    return rows.map(({ id, lang, day, title, entries, paper }) => {
+      const answers = JSON.parse(entries) as Entry[];
+      const grid = inspect(answers);
+      const total = grid.letters.size;
+      let filled = 0,
+        correct = 0;
+      for (const [cell, guess] of marks.values(id) as string[][]) {
+        if (!grid.letters.has(cell)) continue;
+        filled++;
+        if (grid.letters.get(cell) === guess.toUpperCase()) correct++;
+      }
+      // A tiny facsimile of the letter squares. Only coordinates leave the server.
+      const squares = [...grid.letters.keys()]
+        .map((key) => "M" + key + "h.88v.88h-.88z")
+        .join("");
+      return {
+        id,
+        lang,
+        day,
+        title,
+        paper,
+        total,
+        filled,
+        solved: total > 0 && correct === total,
+        count: answers.length,
+        squares,
+        bounds: total
+          ? [grid.left, grid.top, grid.width, grid.height]
+          : [0, 0, 1, 1],
+      };
+    });
+  }
   recentEditions(lang: string, day: string) {
     return this.db
       .query(
@@ -131,6 +172,8 @@ export class Collection {
         clue: clues[i],
       })),
       feedback: row.feedback,
+      title: row.title,
+      lang: row.lang,
       layout: row.layout,
       paper: row.paper,
       guesses: Object.fromEntries(
